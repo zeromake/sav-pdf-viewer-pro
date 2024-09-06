@@ -13,7 +13,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import android.widget.Toast
 import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
@@ -43,7 +42,7 @@ class BookmarksItemAdapter(
     override fun onBindViewHolder(holder: ItemViewHolder, position: Int) {
         val item = items[position]
 
-        holder.title.text = holder.page_number.replace("%d", (item.page + 1).toString())
+        holder.title.text = holder.pageNumber.replace("%d", (item.page + 1).toString())
 
         val databaseHandler = DatabaseHandler(context)
 
@@ -51,7 +50,6 @@ class BookmarksItemAdapter(
         val startX = holder.card.x
         var startX_moving: Float? = null
         var cancelled = false
-        var goto_activated = false
 
         holder.card.setOnTouchListener(View.OnTouchListener { view, event ->
             val displayMetrics = view.resources.displayMetrics
@@ -197,21 +195,21 @@ class BookmarksItemAdapter(
         }
     }
 
-    fun goToPage(context: Context, page: Int, animation: Boolean = true) {
+    private fun goToPage(context: Context, page: Int, animation: Boolean = true) {
         (context as PDFViewer).goToPage(
             valueToGo = page,
             animation = true
         )
     }
 
-    fun loadPreview(
+    private fun loadPreview(
         lastPosition: Int, uri: Uri, holder: ItemViewHolder
     ) {
         try {
             val pdfiumCore = PdfiumCore(context)
             try {
                 val parcelFileDescriptor: ParcelFileDescriptor? =
-                    context.getContentResolver().openFileDescriptor(uri, "r")
+                    context.contentResolver.openFileDescriptor(uri, "r")
                 val pdfDocument: PdfDocument = pdfiumCore.newDocument(parcelFileDescriptor)
                 pdfiumCore.openPage(pdfDocument, lastPosition)
                 val width = pdfiumCore.getPageWidthPoint(pdfDocument, lastPosition)
@@ -255,8 +253,8 @@ class BookmarksItemAdapter(
         val constraintLayoutRecyclerBookmark: ConstraintLayout =
             view.findViewById(R.id.constraintLayoutRecyclerBookmark)
 
-        val page_number = view.resources.getString(R.string.page_number_text)
-        val deleted_bookmark_text = view.resources.getString(R.string.toast_bookmark_removed)
+        val pageNumber = view.resources.getString(R.string.page_number_text)
+        val deletedBookmarkText = view.resources.getString(R.string.toast_bookmark_removed)
         val colorRed = ContextCompat.getColor(view.context, R.color.red)
         val colorDarkDarkDarkRed = ContextCompat.getColor(view.context, R.color.dark_dark_dark_red)
         val colorDarkGray = ContextCompat.getColor(view.context, R.color.dark_gray)

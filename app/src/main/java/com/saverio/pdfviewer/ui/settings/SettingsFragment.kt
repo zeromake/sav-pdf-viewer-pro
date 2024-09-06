@@ -18,7 +18,7 @@ class SettingsFragment : Fragment() {
             savedInstanceState: Bundle?
     ): View? {
         settingsViewModel =
-                ViewModelProvider(this).get(SettingsViewModel::class.java)
+            ViewModelProvider(this)[SettingsViewModel::class.java]
         val root = inflater.inflate(R.layout.fragment_settings, container, false)
 
 

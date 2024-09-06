@@ -65,7 +65,7 @@ class DatabaseHandler(context: Context) :
         return success
     }
 
-    @SuppressLint("Range")
+    @SuppressLint("Range", "Recycle")
     fun getFiles(id: String? = null): ArrayList<FilesModel> {
         val filesList = ArrayList<FilesModel>()
         var query = "SELECT * FROM `${TABLE_NAME_FILES}`"
@@ -147,6 +147,7 @@ class DatabaseHandler(context: Context) :
         return success
     }
 
+    @SuppressLint("Recycle")
     fun checkFile(id: String): Boolean {
         var returnValue = false
         val query =
@@ -190,7 +191,7 @@ class DatabaseHandler(context: Context) :
         return success
     }
 
-    @SuppressLint("Range")
+    @SuppressLint("Range", "Recycle")
     fun getBookmarks(fileId: String, page: Int? = null): ArrayList<BookmarksModel> {
         //get all bookmarks from a specific file (or a specific bookmark-id)
         val filesList = ArrayList<BookmarksModel>()
@@ -272,6 +273,7 @@ class DatabaseHandler(context: Context) :
         return success
     }
 
+    @SuppressLint("Recycle")
     fun checkBookmark(fileId: String, page: Int): Boolean {
         var returnValue = false
         val query =
@@ -296,7 +298,7 @@ class DatabaseHandler(context: Context) :
         return returnValue
     }
 
-    @SuppressLint("Range")
+    @SuppressLint("Range", "Recycle")
     private fun getNewIdBookmarks(): Int {
         //get a new unique id for bookmarks (based to the last one created)
         var valueToReturn = 0

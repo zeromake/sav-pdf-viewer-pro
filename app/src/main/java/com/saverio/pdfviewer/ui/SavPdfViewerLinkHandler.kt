@@ -1,9 +1,9 @@
 package com.saverio.pdfviewer.ui
 
 import android.app.AlertDialog
-import android.text.Html
 import android.content.Intent
 import android.net.Uri
+import androidx.core.text.HtmlCompat
 import com.github.barteksc.pdfviewer.PDFView
 import com.github.barteksc.pdfviewer.link.DefaultLinkHandler
 import com.github.barteksc.pdfviewer.link.LinkHandler
@@ -15,7 +15,7 @@ class SavPdfViewerLinkHandler(private val pdfView: PDFView) : LinkHandler {
     override fun handleLinkEvent(event: LinkTapEvent) {
         val uri = event.link.uri
         val page = event.link.destPageIdx
-        if (uri != null && !uri.isEmpty()) {
+        if (uri != null && uri.isNotEmpty()) {
             handleUri(uri)
         } else page?.let { handlePage(it) }
     }
@@ -37,9 +37,10 @@ class SavPdfViewerLinkHandler(private val pdfView: PDFView) : LinkHandler {
 
         alertDialogBuilder.setTitle("Open link")
         alertDialogBuilder.setMessage(
-            Html.fromHtml(
-                pdfView.context.getString(R.string.confirmation_open_link).replace("{{url}}", url)
-            )
+           HtmlCompat.fromHtml(
+               pdfView.context.getString(R.string.confirmation_open_link).replace("{{url}}", url),
+               HtmlCompat.FROM_HTML_MODE_LEGACY
+           )
         )
 
         alertDialogBuilder.setPositiveButton("Yes") { dialog, which ->

@@ -395,7 +395,7 @@ class PDFViewer : AppCompatActivity() {
         )
     }
 
-    fun incrementHideTopBarCounter() {
+    private fun incrementHideTopBarCounter() {
         Handler(Looper.getMainLooper()).postDelayed({
             hideTopBarCounter++
             incrementHideTopBarCounter()
@@ -407,11 +407,11 @@ class PDFViewer : AppCompatActivity() {
         }, 1000)
     }
 
-    fun resetHideTopBarCounter() {
+    private fun resetHideTopBarCounter() {
         hideTopBarCounter = 0
     }
 
-    fun selectPdfFromURI(uri: Uri?) {
+    private fun selectPdfFromURI(uri: Uri?) {
         try {
             //Toast.makeText(this, fileOpened, Toast.LENGTH_LONG).show()
             //Toast.makeText(this, uri.toString(), Toast.LENGTH_LONG).show()
@@ -507,7 +507,7 @@ class PDFViewer : AppCompatActivity() {
 
                     val residualView: View = findViewById(R.id.residualView)
                     val fullView: View = findViewById(R.id.fullView)
-                    var currentStatus = "landscape"
+                    var currentStatus: String
                     val toAddOrRemove = fullView.measuredHeight - residualView.measuredHeight
                     if (nowLandscape == Configuration.ORIENTATION_LANDSCAPE) {
                         currentStatus = "landscape"
@@ -588,7 +588,7 @@ class PDFViewer : AppCompatActivity() {
                         buttonSideScroll.isGone = false
                         buttonBottomScroll.isGone = true
                     }
-                }.onError(OnErrorListener {
+                }.onError({
                     if (it.message.toString()
                             .contains("Password required or incorrect password.")
                     ) {
@@ -604,7 +604,7 @@ class PDFViewer : AppCompatActivity() {
         }
     }
 
-    fun askThePassword(uri: Uri?, passwordWrong: Boolean = false) {
+    private fun askThePassword(uri: Uri?, passwordWrong: Boolean = false) {
         showMessagePassword(passwordWrong)
 
         val buttonOpen: TextView = findViewById(R.id.buttonOpenPassword)
@@ -653,7 +653,7 @@ class PDFViewer : AppCompatActivity() {
         }
     }
 
-    fun showMessagePassword(passwordWrong: Boolean = false) {
+    private fun showMessagePassword(passwordWrong: Boolean = false) {
         hideGoToDialog()
         hideMenuPanel()
         hideMessageGuide1()
@@ -692,7 +692,7 @@ class PDFViewer : AppCompatActivity() {
         }
     }
 
-    fun hideMessagePassword() {
+    private fun hideMessagePassword() {
         val background: View = findViewById(R.id.passwordBackgroundScreen)
         val message: ConstraintLayout = findViewById(R.id.messagePassword)
 
@@ -809,6 +809,7 @@ class PDFViewer : AppCompatActivity() {
         titleElement.text = titleTemp
     }
 
+    @SuppressLint("SetTextI18n")
     private fun updatePdfPage(pathName: String, currentPage: Int) {
         val pathNameTemp = getTheFileName(pathName, 0).toMD5() //file-id
         val databaseHandler = DatabaseHandler(this)
@@ -845,7 +846,7 @@ class PDFViewer : AppCompatActivity() {
         else setPositionBottomScrollbarByPage((currentPage + 1).toFloat())
     }
 
-    fun updateButtonBookmark(pathName: String, currentPage: Int) {
+    private fun updateButtonBookmark(pathName: String, currentPage: Int) {
         val pathNameTemp = getTheFileName(pathName, 0).toMD5() //file-id
         val bookmarkButton: ImageView = findViewById(R.id.buttonBookmarkToolbar)
 
@@ -897,7 +898,7 @@ class PDFViewer : AppCompatActivity() {
         resetHideTopBarCounter()
     }
 
-    fun showAllBookmarks(pathName: String) {
+    private fun showAllBookmarks(pathName: String) {
         val pathNameTemp = getTheFileName(pathName, 0).toMD5() //file-id
         val databaseHandler = DatabaseHandler(this)
         val bookmarks = databaseHandler.getBookmarks(fileId = pathNameTemp)
@@ -974,16 +975,16 @@ class PDFViewer : AppCompatActivity() {
         }
     }
 
-    fun getTheFileName(path: String, type: Int = 0): String {
+    private fun getTheFileName(path: String, type: Int = 0): String {
         try {
             var pathTemp = path
             pathTemp = pathTemp.replace("%3A", ":").replace("%2F", "/").replace("content://", "")
 
             var pathName = ""
-            if (pathTemp.contains(":/")) {
-                pathName = pathTemp.split(":/")[1]
+            pathName = if (pathTemp.contains(":/")) {
+                pathTemp.split(":/")[1]
             } else {
-                pathName = pathTemp
+                pathTemp
             }
             val paths = pathName.split("/")
             val fileName = paths[paths.size - 1]
@@ -991,7 +992,7 @@ class PDFViewer : AppCompatActivity() {
             when (type) {
                 0 -> {
                     //path name
-                    return "/" + pathName
+                    return "/$pathName"
                 }
 
                 1 -> {
@@ -1001,7 +1002,7 @@ class PDFViewer : AppCompatActivity() {
 
                 2 -> {
                     //path (also content://)
-                    return "content://" + pathTemp
+                    return "content://$pathTemp"
                 }
 
                 else -> {
@@ -1015,16 +1016,16 @@ class PDFViewer : AppCompatActivity() {
         return ""
     }
 
-    fun String.toMD5(): String {
+    private fun String.toMD5(): String {
         val bytes = MessageDigest.getInstance("MD5").digest(this.toByteArray())
         return bytes.toHex()
     }
 
-    fun ByteArray.toHex(): String {
+    private fun ByteArray.toHex(): String {
         return joinToString("") { "%02x".format(it) }
     }
 
-    fun setShareButton() {
+    private fun setShareButton() {
         //intent.getStringExtra("iName")
         val shareIntent = Intent()
         shareIntent.action = Intent.ACTION_SEND
@@ -1106,13 +1107,13 @@ class PDFViewer : AppCompatActivity() {
         }
     }
 
-    fun checkFirstTimeShowMessageGuide() {
+    private fun checkFirstTimeShowMessageGuide() {
         if (getBooleanData("firstTimeShowTopBar", true) && showingTopBar) {
             val message: ConstraintLayout = findViewById(R.id.messageGuide1)
             val arrow: View = findViewById(R.id.arrowRight2)
             val messageText: TextView = findViewById(R.id.messageTextGuide1)
 
-            messageText.setText(getString(R.string.text_tap_here_to_show_go_to_dialog))
+            messageText.text = getString(R.string.text_tap_here_to_show_go_to_dialog)
             message.isGone = false
             arrow.isGone = false
 
@@ -1145,7 +1146,7 @@ class PDFViewer : AppCompatActivity() {
                     .setDuration(0).start()
             }, 0)
 
-            messageText.setText(getString(R.string.text_tap_here_to_show_menu_panel))
+            messageText.text = getString(R.string.text_tap_here_to_show_menu_panel)
             message.isGone = false
             arrow.isGone = false
 
@@ -1161,7 +1162,7 @@ class PDFViewer : AppCompatActivity() {
             val message: ConstraintLayout = findViewById(R.id.messageGuide1)
             val arrow: View = findViewById(R.id.arrowRight2)
             val messageText: TextView = findViewById(R.id.messageTextGuide1)
-            messageText.setText(getString(R.string.text_tap_here_to_add_or_remove_the_current_page_to_bookmarks))
+            messageText.text = getString(R.string.text_tap_here_to_add_or_remove_the_current_page_to_bookmarks)
 
             val bookmarkButtonToolbar: ImageView = findViewById(R.id.buttonBookmarkToolbar)
             bookmarkButtonToolbar.isGone = false
@@ -1185,7 +1186,8 @@ class PDFViewer : AppCompatActivity() {
         }
     }
 
-    fun hideTopBar(fullHiding: Boolean = false, x: Float = 0F, y: Float = 0F) {
+    @SuppressLint("CutPasteId")
+    private fun hideTopBar(fullHiding: Boolean = false, x: Float = 0F, y: Float = 0F) {
         if (x == y) {
             val message: ConstraintLayout = findViewById(R.id.messageGuide1)
             val messageGoTo: ConstraintLayout = findViewById(R.id.messageGoTo)
@@ -1221,7 +1223,7 @@ class PDFViewer : AppCompatActivity() {
                     val arrow: View = findViewById(R.id.arrowLeft)
 
                     val messageText: TextView = findViewById(R.id.messageTextGuide1)
-                    messageText.setText(getString(R.string.text_tap_here_to_show_the_top_bar))
+                    messageText.text = getString(R.string.text_tap_here_to_show_the_top_bar)
                     message.isGone = false
                     arrow.isGone = false
 
@@ -1307,7 +1309,8 @@ class PDFViewer : AppCompatActivity() {
         }
     }
 
-    fun showHideAfterFiveSeconds() {
+    @SuppressLint("CutPasteId")
+    private fun showHideAfterFiveSeconds() {
         hideMessageGuide1()
         if (getBooleanData("firstTimeHideTotallyTopBar", true)) {
             val message: ConstraintLayout = findViewById(R.id.messageGuide1)
@@ -1315,7 +1318,7 @@ class PDFViewer : AppCompatActivity() {
             val messageText: TextView = findViewById(R.id.messageTextGuide1)
             val buttonSideScroll: TextView = findViewById(R.id.buttonSideScroll)
             val buttonBottomScroll: TextView = findViewById(R.id.buttonSideScroll)
-            messageText.setText(getString(R.string.text_scroll_to_show_the_top_bar_again))
+            messageText.text = getString(R.string.text_scroll_to_show_the_top_bar_again)
             message.isGone = false
             arrow.isGone = true
             buttonSideScroll.isGone = true
@@ -1329,7 +1332,7 @@ class PDFViewer : AppCompatActivity() {
         }
     }
 
-    fun hideMessageGuide1() {
+    private fun hideMessageGuide1() {
         val message: ConstraintLayout = findViewById(R.id.messageGuide1)
         val arrow0: View = findViewById(R.id.arrowLeft)
         val arrow1: View = findViewById(R.id.arrowRight)
@@ -1342,7 +1345,7 @@ class PDFViewer : AppCompatActivity() {
         arrow3.isGone = true
     }
 
-    fun checkReviewFollowApp() {
+    private fun checkReviewFollowApp() {
         var timesOpened = getSharedPreferences(
             "app_opened_times", Context.MODE_PRIVATE
         ).getInt("app_opened_times", 0)
@@ -1415,11 +1418,8 @@ class PDFViewer : AppCompatActivity() {
 
         //check whether show "review on google play" message
         if (!alreadyReviewed) {
-            if ((timesOpened % timesAfterOpenReviewMessage) == 0 && timesOpened >= timesAfterOpenReviewMessage) {
-                messageContainerReview.isGone = false
-            } else {
-                messageContainerReview.isGone = true
-            }
+            messageContainerReview.isGone =
+                !((timesOpened % timesAfterOpenReviewMessage) == 0 && timesOpened >= timesAfterOpenReviewMessage)
         } else {
             messageContainerReview.isGone = true
         }
@@ -1439,11 +1439,9 @@ class PDFViewer : AppCompatActivity() {
         //check whether show "donate on liberapay" message
         if (!donateLiberaPay) {
             if ((timesOpened % timesAfterLiberaPay) == 0 && timesOpened >= timesAfterLiberaPay) {
-                messageTextLiberaPay.setText(
-                    getString(R.string.text_donate_liberapay).replace(
-                        "{n_times}",
-                        timesOpened.toString()
-                    )
+                messageTextLiberaPay.text = getString(R.string.text_donate_liberapay).replace(
+                    "{n_times}",
+                    timesOpened.toString()
                 )
                 messageContainerLiberaPay.isGone = false
             } else {
@@ -1458,7 +1456,7 @@ class PDFViewer : AppCompatActivity() {
             .putInt("app_opened_times", timesOpened).apply()
     }
 
-    fun openOnGooglePlay(): Boolean {
+    private fun openOnGooglePlay(): Boolean {
         var valueToReturn = true
         try {
             startActivity(
@@ -1467,7 +1465,7 @@ class PDFViewer : AppCompatActivity() {
                 )
             )
         } catch (e: Exception) {
-            println("Exception 3: " + e.toString())
+            println("Exception 3: $e")
             valueToReturn = false
         }
 
@@ -1488,14 +1486,14 @@ class PDFViewer : AppCompatActivity() {
         return valueToReturn
     }
 
-    fun openInstagram(): Boolean {
+    private fun openInstagram(): Boolean {
         var valueToReturn = true
         try {
             startActivity(
                 Intent(instagramIntent(this))
             )
         } catch (e: Exception) {
-            println("Exception 10: " + e.toString())
+            println("Exception 10: $e")
             valueToReturn = false
         }
 
@@ -1523,7 +1521,8 @@ class PDFViewer : AppCompatActivity() {
         }
     }
 
-    fun showGoToDialog(x: Float = 0F, y: Float = 0F) {
+    @SuppressLint("SetTextI18n")
+    private fun showGoToDialog(x: Float = 0F, y: Float = 0F) {
         if (x == y) {
             if (pdfViewer.currentPage == 0) showTopBar(showGoTop = false)
             else showTopBar()
@@ -1593,17 +1592,17 @@ class PDFViewer : AppCompatActivity() {
         }
     }
 
-    fun goToFeature(textbox: EditText) {
+    private fun goToFeature(textbox: EditText) {
         var valueToGo = pdfViewer.currentPage + 1
 
         val valueTemp = textbox.text.toString().replace(" ", "")
         if (valueTemp != "" && valueTemp != "-") {
-            if (valueTemp.toInt() < 0) {
-                valueToGo = 0
+            valueToGo = if (valueTemp.toInt() < 0) {
+                0
             } else if (valueTemp.toInt() > totalPages) {
-                valueToGo = totalPages
+                totalPages
             } else {
-                valueToGo = valueTemp.toInt() - 1
+                valueTemp.toInt() - 1
             }
         }
         try {
@@ -1619,12 +1618,12 @@ class PDFViewer : AppCompatActivity() {
         if (dialog != null) dialog!!.dismiss()
     }
 
-    fun hideKeyboard(view: View) {
+    private fun hideKeyboard(view: View) {
         val manager = getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
         if (manager.isActive) manager.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
 
-    fun showSoftKeyboard(view: View) {
+    private fun showSoftKeyboard(view: View) {
         if (view.requestFocus()) {
             val inputMethodManager: InputMethodManager =
                 getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
@@ -1632,14 +1631,14 @@ class PDFViewer : AppCompatActivity() {
         }
     }
 
-    fun hideGoToDialog() {
+    private fun hideGoToDialog() {
         val message: ConstraintLayout = findViewById(R.id.messageGoTo)
         val arrow: View = findViewById(R.id.arrowMessageGoTo)
         message.isGone = true
         arrow.isGone = true
     }
 
-    fun showMenuPanel() {
+    private fun showMenuPanel() {
         hideMessageGuide1()
         hideGoToDialog()
 
@@ -1685,7 +1684,7 @@ class PDFViewer : AppCompatActivity() {
         resetZoomButton.isGone = false
     }
 
-    fun hideMenuPanel() {
+    private fun hideMenuPanel() {
         val message: ConstraintLayout = findViewById(R.id.messageMenuPanel)
         val arrow: View = findViewById(R.id.arrowMenuPanel)
         message.isGone = true
@@ -1710,13 +1709,13 @@ class PDFViewer : AppCompatActivity() {
         })
     }
 
-    fun getBooleanData(variable: String, default: Boolean = false): Boolean {
+    private fun getBooleanData(variable: String, default: Boolean = false): Boolean {
         return getSharedPreferences(variable, Context.MODE_PRIVATE).getBoolean(
             variable, default
         )
     }
 
-    fun saveBooleanData(variable: String, value: Boolean) {
+    private fun saveBooleanData(variable: String, value: Boolean) {
         getSharedPreferences(variable, Context.MODE_PRIVATE).edit().putBoolean(variable, value)
             .apply()
     }
@@ -1727,7 +1726,7 @@ class PDFViewer : AppCompatActivity() {
             val button: TextView = findViewById(R.id.buttonSideScroll)
             val textPage: TextView = findViewById(R.id.textSideScroll)
             val container: ConstraintLayout = findViewById(R.id.containerSideScroll)
-            var startY_moving: Float? = null
+            var startyMoving: Float? = null
             var scrolled: Float = 0F
 
             button.setOnTouchListener(View.OnTouchListener { view, event ->
@@ -1743,7 +1742,7 @@ class PDFViewer : AppCompatActivity() {
                         button.isGone = true
                         button.isGone = false
                         // get the new co-ordinate of X-axis
-                        if (startY_moving == null) startY_moving = event.rawY - startY
+                        if (startyMoving == null) startyMoving = event.rawY - startY
                         val newY = event.rawY - startY
                         scrolled = newY - minPositionScrollbar
                         if (scrolled < 0F) scrolled = 0F
@@ -1775,7 +1774,7 @@ class PDFViewer : AppCompatActivity() {
                         button.layoutParams.width = 30;
                         button.isGone = true
                         button.isGone = false
-                        startY_moving = null
+                        startyMoving = null
 
                         val pageN = ((totalPages - 1) * scrolled) / maxPositionScrollbar
 
@@ -1788,7 +1787,7 @@ class PDFViewer : AppCompatActivity() {
                         button.layoutParams.width = 30;
                         button.isGone = true
                         button.isGone = false
-                        startY_moving = null
+                        startyMoving = null
 
                         val pageN = ((totalPages - 1) * scrolled) / maxPositionScrollbar
 
@@ -1802,12 +1801,11 @@ class PDFViewer : AppCompatActivity() {
                 return@OnTouchListener true
             })
 
-            if (!horizontal && totalPages > 1) button.isGone = false
-            else button.isGone = true
+            button.isGone = !(!horizontal && totalPages > 1)
         }
     }
 
-    fun setPositionScrollbarByPage(page: Float, animationDuration: Long = 0) {
+    private fun setPositionScrollbarByPage(page: Float, animationDuration: Long = 0) {
         if (isSupportedScrollbarButton) {
             val button: TextView = findViewById(R.id.buttonSideScroll)
             val textPage: TextView = findViewById(R.id.textSideScroll)
@@ -1834,7 +1832,7 @@ class PDFViewer : AppCompatActivity() {
             val button: TextView = findViewById(R.id.buttonBottomScroll)
             val textPage: TextView = findViewById(R.id.textBottomScroll)
             val container: ConstraintLayout = findViewById(R.id.containerBottomScroll)
-            var startX_moving: Float? = null
+            var startxMoving: Float? = null
             var scrolled: Float = 0F
 
             button.setOnTouchListener(View.OnTouchListener { view, event ->
@@ -1850,7 +1848,7 @@ class PDFViewer : AppCompatActivity() {
                         button.isGone = true
                         button.isGone = false
                         // get the new co-ordinate of X-axis
-                        if (startX_moving == null) startX_moving =
+                        if (startxMoving == null) startxMoving =
                             event.rawX - startX - button.width
                         val newX = event.rawX - startX - button.width
                         scrolled = newX - minPositionScrollbarHorizontal
@@ -1888,7 +1886,7 @@ class PDFViewer : AppCompatActivity() {
                         button.layoutParams.height = 30;
                         button.isGone = true
                         button.isGone = false
-                        startX_moving = null
+                        startxMoving = null
 
                         val pageN = ((totalPages + 1) * scrolled) / maxPositionScrollbarHorizontal
 
@@ -1901,7 +1899,7 @@ class PDFViewer : AppCompatActivity() {
                         button.layoutParams.height = 30;
                         button.isGone = true
                         button.isGone = false
-                        startX_moving = null
+                        startxMoving = null
 
                         val pageN = ((totalPages + 1) * scrolled) / maxPositionScrollbarHorizontal
 
@@ -1915,12 +1913,11 @@ class PDFViewer : AppCompatActivity() {
                 return@OnTouchListener true
             })
 
-            if (horizontal && totalPages > 1) button.isGone = false
-            else button.isGone = true
+            button.isGone = !(horizontal && totalPages > 1)
         }
     }
 
-    fun setPositionBottomScrollbarByPage(page: Float, animationDuration: Long = 0) {
+    private fun setPositionBottomScrollbarByPage(page: Float, animationDuration: Long = 0) {
         if (isSupportedScrollbarButton) {
             val button: TextView = findViewById(R.id.buttonBottomScroll)
             val textPage: TextView = findViewById(R.id.textBottomScroll)
@@ -1941,7 +1938,7 @@ class PDFViewer : AppCompatActivity() {
         }
     }
 
-    fun openGetHelp() {
+    private fun openGetHelp() {
         this.startActivity(
             Intent(
                 Intent.ACTION_VIEW,
@@ -1950,22 +1947,22 @@ class PDFViewer : AppCompatActivity() {
         )
     }
 
-    fun zoomIn() {
+    private fun zoomIn() {
         if (pdfViewer.zoom <= (10.0F - zoom_value)) pdfViewer.zoomWithAnimation(pdfViewer.zoom + zoom_value)
         setCurrentZoomStatus()
     }
 
-    fun zoomOut() {
+    private fun zoomOut() {
         if (pdfViewer.zoom >= (0.0F + zoom_value)) pdfViewer.zoomWithAnimation(pdfViewer.zoom - zoom_value)
         setCurrentZoomStatus()
     }
 
-    fun resetZoom() {
+    private fun resetZoom() {
         pdfViewer.resetZoomWithAnimation()
         setCurrentZoomStatus()
     }
 
-    fun setCurrentZoomStatus() {
+    private fun setCurrentZoomStatus() {
         val resetZoomButton: TextView = findViewById(R.id.buttonResetZoomToolbar)
         resetZoomButton.text =
             getString(R.string.zoom_status_perc).replace(

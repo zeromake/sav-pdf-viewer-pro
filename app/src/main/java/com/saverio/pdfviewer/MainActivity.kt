@@ -3,16 +3,11 @@ package com.saverio.pdfviewer
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.navigation.findNavController
-import androidx.navigation.ui.AppBarConfiguration
-import androidx.navigation.ui.setupActionBarWithNavController
-import androidx.navigation.ui.setupWithNavController
 
 class MainActivity : AppCompatActivity() {
 
-    val RECENT_FILES = "recents"
+    private val RECENT_FILES = "recents"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,16 +30,16 @@ class MainActivity : AppCompatActivity() {
         val recentFiles: String? =
             getSharedPreferences(RECENT_FILES, Context.MODE_PRIVATE).getString(RECENT_FILES, "")
         var recentFilesToSave = ""
-        var recentFilesParts = recentFiles?.split("/:::/")
+        val recentFilesParts = recentFiles?.split("/:::/")
         var i = 0
-        var added_i = 0
+        var addedI = 0
         while (i < recentFilesParts!!.size) {
             val recentFilesParts2 = recentFilesParts[i].split(":::")
 
             if (recentFilesParts2.size == 3) {
-                if (added_i > 0) recentFilesToSave += "/:::/"
+                if (addedI > 0) recentFilesToSave += "/:::/"
                 recentFilesToSave += "${recentFilesParts2[0]}:::${recentFilesParts2[1]}:::${recentFilesParts2[2]}"
-                added_i++
+                addedI++
                 //println("Recent ${i}:\ndate:${recentFilesParts2[0]}\nuri:${recentFilesParts2[1]}\nfavourite:${recentFilesParts2[2]}\n\n")
             }
             i++
@@ -57,14 +52,14 @@ class MainActivity : AppCompatActivity() {
         var recentFilesToSave = ""
         var recentFilesParts = recentFiles?.split("/:::/")
         var i = 0
-        var added_i = 0
+        var addedI = 0
         while (i < recentFilesParts!!.size) {
             val recentFilesParts2 = recentFilesParts[i].split(":::")
 
             if (recentFilesParts2.size == 3 && recentFilesParts2[2] == "true") {
-                if (added_i > 0) recentFilesToSave += "/:::/"
+                if (addedI > 0) recentFilesToSave += "/:::/"
                 recentFilesToSave += "${recentFilesParts2[0]}:::${recentFilesParts2[1]}:::${recentFilesParts2[2]}"
-                added_i++
+                addedI++
                 //println("Recent ${i}:\ndate:${recentFilesParts2[0]}\nuri:${recentFilesParts2[1]}\nfavourite:${recentFilesParts2[2]}\n\n")
             }
             i++
