@@ -1,10 +1,9 @@
 import android.annotation.SuppressLint
 import android.content.ContentUris
 import android.content.Context
-import android.content.CursorLoader
+import androidx.loader.content.CursorLoader
 import android.database.Cursor
 import android.net.Uri
-import android.os.Build
 import android.os.Environment
 import android.provider.DocumentsContract
 import android.provider.MediaStore
@@ -13,13 +12,7 @@ import android.text.TextUtils
 object RealPathUtil {
 
     fun getRealPath(context: Context, fileUri: Uri): String? {
-        return if (Build.VERSION.SDK_INT < 19) {
-            // SDK >= 11 && SDK < 19
-            getRealPathFromURIAPI11to18(context, fileUri)
-        } else {
-            // SDK > 19 (Android 4.4) and up
-            getRealPathFromURIAPI19(context, fileUri)
-        }
+        return getRealPathFromURIAPI19(context, fileUri)
     }
 
     @SuppressLint("NewApi")
@@ -51,7 +44,7 @@ object RealPathUtil {
     @SuppressLint("NewApi")
     fun getRealPathFromURIAPI19(context: Context, uri: Uri): String? {
 
-        val isKitKat = Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT
+        val isKitKat = true
 
         // DocumentProvider
         if (isKitKat && DocumentsContract.isDocumentUri(context, uri)) {

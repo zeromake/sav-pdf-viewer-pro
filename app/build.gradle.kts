@@ -5,12 +5,13 @@ plugins {
 }
 
 android {
-    compileSdk = 33
+    namespace = "com.saverio.pdfviewer"
+    compileSdk = 34
 
     defaultConfig {
         applicationId = "com.saverio.pdfviewer"
         minSdk = 21
-        targetSdk = 33
+        targetSdk = 34
         versionCode = 64
         versionName = "1.15.1.2"
 
@@ -21,6 +22,11 @@ android {
         release {
             isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+        }
+        debug {
+            isDebuggable = true
+            applicationIdSuffix = ".debug"
+            versionNameSuffix = "-debug"
         }
     }
     compileOptions {
@@ -34,31 +40,31 @@ android {
 
 dependencies {
 
-    val kotlin_version = "1.4.21"
+    val kotlin_version = "1.9.22"
 
     implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version")
-    implementation("androidx.core:core-ktx:1.6.0")
-    implementation("androidx.appcompat:appcompat:1.3.1")
-    implementation("com.google.android.material:material:1.4.0")
-    implementation("androidx.constraintlayout:constraintlayout:2.1.0")
-    implementation("androidx.vectordrawable:vectordrawable:1.1.0")
+    implementation("androidx.core:core-ktx:1.13.1")
+    implementation("androidx.appcompat:appcompat:1.7.0")
+    implementation("com.google.android.material:material:1.12.0")
+    implementation("androidx.constraintlayout:constraintlayout:2.1.4")
+    implementation("androidx.vectordrawable:vectordrawable:1.2.0")
 
-    val navigation_version = "2.3.5"
-    implementation("androidx.navigation:navigation-fragment:$navigation_version")
-    implementation("androidx.navigation:navigation-ui:$navigation_version")
+    val navigation_version = "2.8.0"
+    implementation("androidx.navigation:navigation-fragment-ktx:$navigation_version")
+    implementation("androidx.navigation:navigation-ui-ktx:$navigation_version")
     implementation("androidx.navigation:navigation-fragment-ktx:$navigation_version")
     implementation("androidx.navigation:navigation-ui-ktx:$navigation_version")
 
-    val lifecycle_version = "2.3.1"
+    val lifecycle_version = "2.8.5"
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:$lifecycle_version")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version")
 
     //implementation "androidx.core:core-ktx:+"
-    testImplementation("junit:junit:4.+")
-    androidTestImplementation("androidx.test.ext:junit:1.1.3")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.4.0")
+    testImplementation("junit:junit:4.13.2")
+    androidTestImplementation("androidx.test.ext:junit:1.2.1")
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
 
-    implementation("com.github.barteksc:pdfium-android:1.9.0")
-    implementation("com.github.barteksc:android-pdf-viewer:3.1.0-beta.1")
+    implementation("com.github.lion1988dev:PdfiumAndroid:1.9.4")
+    implementation("com.github.lion1988dev:AndroidPdfViewer:3.2.3")
 //Use "2.8.2" is stable | "3.1.0-beta.1" is unstable
 }

@@ -219,7 +219,7 @@ class DatabaseHandler(context: Context) :
                 val notes = cursor.getString(cursor.getColumnIndex(COLUMN_NOTES_BOOKMARKS))
 
                 val fileToAdd = BookmarksModel(
-                    id = id!!,
+                    id = id,
                     date = date,
                     file = fileId,
                     page = page,

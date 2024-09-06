@@ -19,14 +19,13 @@ class OpenFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         dashboardViewModel =
-            ViewModelProvider(this).get(OpenViewModel::class.java)
+            ViewModelProvider(this)[OpenViewModel::class.java]
         val root = inflater.inflate(R.layout.fragment_open, container, false)
 
         val main = activity as MainActivity
         main.openPDFFile()
 
-        main.onBackPressed()
-
+        main.onBackPressedDispatcher.onBackPressed()
         return root
     }
 }

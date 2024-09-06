@@ -35,35 +35,38 @@ abstract class OnSwipeTouchListener(ctx: Context) : View.OnTouchListener {
         }
 
         override fun onFling(
-            e1: MotionEvent,
+            e1: MotionEvent?,
             e2: MotionEvent,
             velocityX: Float,
             velocityY: Float
         ): Boolean {
             var result = false
-            try {
-                val diffY = e2.y - e1.y
-                val diffX = e2.x - e1.x
-                if (abs(diffX) > abs(diffY)) {
-                    if (abs(diffX) > SWIPE_THRESHOLD && abs(velocityX) > SWIPE_VELOCITY_THRESHOLD) {
-                        if (diffX > 0) {
-                            onSwipeRight()
+            e1?.let {
+                try {
+                    val diffY = e2.y - e1.y
+                    val diffX = e2.x - e1.x
+                    if (abs(diffX) > abs(diffY)) {
+                        if (abs(diffX) > SWIPE_THRESHOLD && abs(velocityX) > SWIPE_VELOCITY_THRESHOLD) {
+                            if (diffX > 0) {
+                                onSwipeRight()
+                            } else {
+                                onSwipeLeft()
+                            }
+                            result = true
+                        }
+                    } else if (abs(diffY) > SWIPE_THRESHOLD && abs(velocityY) > SWIPE_VELOCITY_THRESHOLD) {
+                        if (diffY > 0) {
+                            onSwipeBottom()
                         } else {
-                            onSwipeLeft()
+                            onSwipeTop()
                         }
                         result = true
                     }
-                } else if (abs(diffY) > SWIPE_THRESHOLD && abs(velocityY) > SWIPE_VELOCITY_THRESHOLD) {
-                    if (diffY > 0) {
-                        onSwipeBottom()
-                    } else {
-                        onSwipeTop()
-                    }
-                    result = true
+                } catch (exception: Exception) {
+                    exception.printStackTrace()
                 }
-            } catch (exception: Exception) {
-                exception.printStackTrace()
             }
+
             return result
         }
 
@@ -73,34 +76,36 @@ abstract class OnSwipeTouchListener(ctx: Context) : View.OnTouchListener {
         }
 
         override fun onScroll(
-            e1: MotionEvent,
+            e1: MotionEvent?,
             e2: MotionEvent,
             distanceX: Float,
             distanceY: Float
         ): Boolean {
-            var type: String
-            val diffY = e2.y - e1.y
-            val diffX = e2.x - e1.x
-            if (abs(diffX) > abs(diffY)) {
-                if (diffX > 0) {
-                    type = "r"//right
+            e1?.let {
+                val type: String
+                val diffY = e2.y - e1.y
+                val diffX = e2.x - e1.x
+                type = if (abs(diffX) > abs(diffY)) {
+                    if (diffX > 0) {
+                        "r"//right
+                    } else {
+                        "l"//left
+                    }
                 } else {
-                    type = "l"//left
+                    if (diffY > 0) {
+                        "d"//down
+                    } else {
+                        "u"//up
+                    }
                 }
-            } else {
-                if (diffY > 0) {
-                    type = "d"//down
+                //println("ass(diffX): ${abs(diffX)} ass(diffY): ${abs(diffY)}")
+                val widthOrHeight = if (abs(diffX) > abs(diffY)) {
+                    abs(diffX)
                 } else {
-                    type = "u"//up
+                    abs(diffY)
                 }
+                onScroll(type, widthOrHeight.toInt());
             }
-            //println("ass(diffX): ${abs(diffX)} ass(diffY): ${abs(diffY)}")
-            var widthOrHeight = if (abs(diffX) > abs(diffY)) {
-                abs(diffX)
-            } else {
-                abs(diffY)
-            }
-            onScroll(type, widthOrHeight.toInt());
             return super.onScroll(e1, e2, distanceX, distanceY)
         }
 

@@ -5,6 +5,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Handler
+import android.os.Looper
 import android.os.ParcelFileDescriptor
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -15,6 +16,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import androidx.core.view.isGone
 import androidx.core.view.isInvisible
@@ -105,7 +107,7 @@ class BookmarksItemAdapter(
                                 //Activated (remove)
                                 //Go all to left
                                 view.animate().x(POSITION_ALL_TO_LEFT).setDuration(500).start()
-                                Handler().postDelayed(
+                                Handler(Looper.getMainLooper()).postDelayed(
                                     {
                                         /*view.animate().x(-(POSITION_ALL_TO_LEFT * 2)).setDuration(0)
                                         .start()*/
@@ -128,12 +130,12 @@ class BookmarksItemAdapter(
                                     .start()
 
                                 holder.cardRemoved.setCardBackgroundColor(holder.colorDarkDarkDarkRed)
-                                Handler().postDelayed(
+                                Handler(Looper.getMainLooper()).postDelayed(
                                     {
                                         holder.cardRemoved.animate()
                                             .x(-holder.cardRemoved.width.toFloat())
                                             .setDuration(500).start()
-                                        Handler().postDelayed({
+                                        Handler(Looper.getMainLooper()).postDelayed({
                                             holder.textViewBookmarkRemoved.isGone = true
                                             holder.card.isGone = true
                                             holder.constraintLayoutRecyclerBookmark.isGone = true
@@ -188,7 +190,7 @@ class BookmarksItemAdapter(
         val uri = databaseHandler.getFiles(item.file)[0].path.toUri()
         val lastPosition = item.page
 
-        Handler().post {
+        Handler(Looper.getMainLooper()).post {
             loadPreview(
                 lastPosition = lastPosition, uri = uri, holder = holder
             )
@@ -255,8 +257,8 @@ class BookmarksItemAdapter(
 
         val page_number = view.resources.getString(R.string.page_number_text)
         val deleted_bookmark_text = view.resources.getString(R.string.toast_bookmark_removed)
-        val colorRed = view.resources.getColor(R.color.red)
-        val colorDarkDarkDarkRed = view.resources.getColor(R.color.dark_dark_dark_red)
-        val colorDarkGray = view.resources.getColor(R.color.dark_gray)
+        val colorRed = ContextCompat.getColor(view.context, R.color.red)
+        val colorDarkDarkDarkRed = ContextCompat.getColor(view.context, R.color.dark_dark_dark_red)
+        val colorDarkGray = ContextCompat.getColor(view.context, R.color.dark_gray)
     }
 }

@@ -1,6 +1,7 @@
 package com.saverio.pdfviewer
 
 import RealPathUtil
+import android.R.attr
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
@@ -10,6 +11,7 @@ import android.content.res.Configuration
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
+import android.os.Looper
 import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.View
@@ -19,12 +21,14 @@ import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.core.view.isGone
 import androidx.core.widget.addTextChangedListener
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.github.barteksc.pdfviewer.PDFView
-import com.github.barteksc.pdfviewer.link.DefaultLinkHandler
 import com.github.barteksc.pdfviewer.listener.OnErrorListener
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.saverio.pdfviewer.db.BookmarksModel
@@ -36,7 +40,6 @@ import java.net.URLDecoder
 import java.security.MessageDigest
 import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.collections.HashMap
 
 
 class PDFViewer : AppCompatActivity() {
@@ -204,7 +207,7 @@ class PDFViewer : AppCompatActivity() {
         currentPage.setOnClickListener {
             if (findViewById<ConstraintLayout>(R.id.messageGoTo).isGone) {
                 val currentPosition1 = pdfViewer.positionOffset
-                Handler().postDelayed({
+                Handler(Looper.getMainLooper()).postDelayed({
                     val currentPosition2 = pdfViewer.positionOffset
                     showGoToDialog(x = currentPosition1, y = currentPosition2)
                 }, 100)
@@ -394,7 +397,7 @@ class PDFViewer : AppCompatActivity() {
     }
 
     fun incrementHideTopBarCounter() {
-        Handler().postDelayed({
+        Handler(Looper.getMainLooper()).postDelayed({
             hideTopBarCounter++
             incrementHideTopBarCounter()
             if (hideTopBarCounter >= 5) {
@@ -709,7 +712,7 @@ class PDFViewer : AppCompatActivity() {
             currentStatus = "portrait"
         }
         val savedPageToUse = savedCurrentPage
-        Handler().postDelayed({
+        Handler(Looper.getMainLooper()).postDelayed({
             pdfViewer.fitToWidth(savedCurrentPage)
             val buttonSideScroll: TextView = findViewById(R.id.buttonSideScroll)
             val buttonBottomScroll: TextView = findViewById(R.id.buttonBottomScroll)
@@ -745,6 +748,7 @@ class PDFViewer : AppCompatActivity() {
         super.onConfigurationChanged(newConfig)
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
@@ -804,10 +808,6 @@ class PDFViewer : AppCompatActivity() {
             )
         }
         titleElement.text = titleTemp
-    }
-
-    override fun onBackPressed() {
-        super.onBackPressed()
     }
 
     private fun updatePdfPage(pathName: String, currentPage: Int) {
@@ -1039,24 +1039,21 @@ class PDFViewer : AppCompatActivity() {
         //TODO
     }
 
-    fun setFullscreenButton(button: ImageView) {
+    private fun setFullscreenButton(button: ImageView) {
         showingTopBar = true
         if (!isFullscreenEnabled) {
             //show fullscreen
-            getWindow().setFlags(
-                WindowManager.LayoutParams.FLAG_FULLSCREEN,
-                WindowManager.LayoutParams.FLAG_FULLSCREEN,
-            )
-            window.decorView.systemUiVisibility =
-                View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY or View.SYSTEM_UI_FLAG_FULLSCREEN
+            WindowCompat.setDecorFitsSystemWindows(window, false)
+            WindowInsetsControllerCompat(window, window.decorView).let { controller ->
+                controller.hide(WindowInsetsCompat.Type.systemBars())
+                controller.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+            }
             button.setImageResource(R.drawable.ic_exit_fullscreen)
             isFullscreenEnabled = true
         } else {
             //hide fullscreen
-            getWindow().clearFlags(
-                WindowManager.LayoutParams.FLAG_FULLSCREEN
-            )
-            window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_VISIBLE
+            WindowCompat.setDecorFitsSystemWindows(window, true)
+            WindowInsetsControllerCompat(window, window.decorView).show(WindowInsetsCompat.Type.systemBars())
             button.setImageResource(R.drawable.ic_fullscreen)
             isFullscreenEnabled = false
         }
@@ -1122,7 +1119,7 @@ class PDFViewer : AppCompatActivity() {
 
             val pageNumberTextViewToolbar: TextView = findViewById(R.id.totalPagesToolbar)
             pageNumberTextViewToolbar.isGone = false
-            Handler().postDelayed({
+            Handler(Looper.getMainLooper()).postDelayed({
                 arrow.animate()
                     .x(pageNumberTextViewToolbar.x + (pageNumberTextViewToolbar.width / 2) - (arrow.width / 2))
                     .setDuration(0).start()
@@ -1143,7 +1140,7 @@ class PDFViewer : AppCompatActivity() {
 
             val showMenuPanelImageViewToolbar: ImageView = findViewById(R.id.buttonMenuToolbar)
             showMenuPanelImageViewToolbar.isGone = false
-            Handler().postDelayed({
+            Handler(Looper.getMainLooper()).postDelayed({
                 arrow.animate()
                     .x(showMenuPanelImageViewToolbar.x + (showMenuPanelImageViewToolbar.width / 2) - (arrow.width / 2) - 25)
                     .setDuration(0).start()
@@ -1169,7 +1166,7 @@ class PDFViewer : AppCompatActivity() {
 
             val bookmarkButtonToolbar: ImageView = findViewById(R.id.buttonBookmarkToolbar)
             bookmarkButtonToolbar.isGone = false
-            Handler().postDelayed({
+            Handler(Looper.getMainLooper()).postDelayed({
                 arrow.animate()
                     .x(bookmarkButtonToolbar.x + (bookmarkButtonToolbar.width / 2) - (arrow.width / 2))
                     .setDuration(0).start()
@@ -1550,7 +1547,7 @@ class PDFViewer : AppCompatActivity() {
 
             val pageNumberTextViewToolbar: TextView = findViewById(R.id.totalPagesToolbar)
             pageNumberTextViewToolbar.isGone = false
-            Handler().postDelayed({
+            Handler(Looper.getMainLooper()).postDelayed({
                 arrow.animate()
                     .x(pageNumberTextViewToolbar.x + (pageNumberTextViewToolbar.width / 2) - (arrow.width / 2))
                     .setDuration(0).start()
@@ -1656,7 +1653,7 @@ class PDFViewer : AppCompatActivity() {
 
         val showMenuPanelToolbar: ImageView = findViewById(R.id.buttonMenuToolbar)
         showMenuPanelToolbar.isGone = false
-        Handler().postDelayed({
+        Handler(Looper.getMainLooper()).postDelayed({
             arrow.animate()
                 .x(showMenuPanelToolbar.x + (showMenuPanelToolbar.width / 2) - (arrow.width / 2) - 25)
                 .setDuration(0).start()
@@ -1706,7 +1703,7 @@ class PDFViewer : AppCompatActivity() {
 
             override fun onSingleTapUp() {
                 val currentPosition1 = pdfViewer.positionOffset
-                Handler().postDelayed({
+                Handler(Looper.getMainLooper()).postDelayed({
                     val currentPosition2 = pdfViewer.positionOffset
                     showTopBar(x = currentPosition1, y = currentPosition2)
                 }, 100)
