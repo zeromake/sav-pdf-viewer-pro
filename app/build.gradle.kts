@@ -64,7 +64,6 @@ dependencies {
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
 
-    implementation("com.github.lion1988dev:PdfiumAndroid:1.9.4")
-    implementation("com.github.lion1988dev:AndroidPdfViewer:3.2.3")
+    implementation(project(":android-pdf-viewer"))
 //Use "2.8.2" is stable | "3.1.0-beta.1" is unstable
 }

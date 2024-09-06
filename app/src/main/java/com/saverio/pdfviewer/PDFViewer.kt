@@ -7,6 +7,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Configuration
+import android.graphics.Rect
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
@@ -28,7 +29,6 @@ import androidx.core.widget.addTextChangedListener
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.github.barteksc.pdfviewer.PDFView
-import com.github.barteksc.pdfviewer.listener.OnErrorListener
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.saverio.pdfviewer.db.BookmarksModel
 import com.saverio.pdfviewer.db.DatabaseHandler
@@ -43,57 +43,63 @@ import java.util.*
 
 class PDFViewer : AppCompatActivity() {
     lateinit var pdfViewer: PDFView
-    val PDF_SELECTION_CODE = 100
+    private val PDF_SELECTION_CODE = 100
 
-    var fileOpened: String? = ""
-    var fileId: String = ""
-    var uriOpened: Uri? = null
+    private var fileOpened: String? = ""
+    private var fileId: String = ""
+    private var uriOpened: Uri? = null
 
-    val timesAfterOpenReviewMessage = 500
-    val timesAfterShowFollowApp = 5
-    val timesAfterLiberaPay = 5000
+    private val timesAfterOpenReviewMessage = 500
+    private val timesAfterShowFollowApp = 5
+    private val timesAfterLiberaPay = 5000
 
-    var isFullscreenEnabled = false
-    var showingTopBar = true
-    var menuOpened = false
+    private var isFullscreenEnabled = true
+    private var showingTopBar = true
+    private var menuOpened = false
 
-    var isSupportedShareFeature = false
-    var isSupportedGoTop = true
-    var isSupportedScrollbarButton = true
+    private var isSupportedShareFeature = false
+    private var isSupportedGoTop = true
+    private var isSupportedScrollbarButton = true
 
-    var passwordRequired = false
-    var passwordToUse = ""
+    private var passwordRequired = false
+    private var passwordToUse = ""
 
-    var totalPages = 0
-    var savedCurrentPageOld = 0
-    var savedCurrentPage = 0
+    private var totalPages = 0
+    private var savedCurrentPageOld = 0
+    private var savedCurrentPage = 0
 
-    var horizontal = false
-    var single_page = false
-    var night_mode = false
+    private var horizontal = true
+    private var singlePage = true
+    private var nightMode = false
 
-    var zoom_value = 0.2F
+    private var zoomValue = 0.2F
 
-    var hideTopBarCounter = 0
-    var dialog: BottomSheetDialog? = null
+    private var hideTopBarCounter = 0
+    private var dialog: BottomSheetDialog? = null
 
-    var residualViewConfigurationConfigurated = false
-    var residualViewConfiguration: HashMap<String, HashMap<String, Int>> =
+    private var residualViewConfigurationConfigurated = false
+    private var residualViewConfiguration: HashMap<String, HashMap<String, Int>> =
         hashMapOf(
             "landscape" to hashMapOf("width" to 0, "height" to 0),
             "portrait" to hashMapOf("width" to 0, "height" to 0)
         ) // {"landscape": [width, height], "portrait": [width, height]}
-    var minPositionScrollbar: Float = 0F
-    var maxPositionScrollbar: Float = 0F
-    var startY = 0F
+    private var minPositionScrollbar: Float = 0F
+    private var maxPositionScrollbar: Float = 0F
+    private var startY = 0F
 
-    var minPositionScrollbarHorizontal: Float = 0F
-    var maxPositionScrollbarHorizontal: Float = 0F
-    var startX = 0F
+    private var minPositionScrollbarHorizontal: Float = 0F
+    private var maxPositionScrollbarHorizontal: Float = 0F
+    private var startX = 0F
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_pdf_viewer)
+
+        val fullScreenButton: ImageView = findViewById(R.id.buttonFullScreenToolbar)
+        if (isFullscreenEnabled) {
+            isFullscreenEnabled = false;
+            setFullscreenButton(fullScreenButton);
+        }
 
         pdfViewer = findViewById(R.id.pdfView)
         var uriToUse: String? = ""
@@ -180,7 +186,7 @@ class PDFViewer : AppCompatActivity() {
             true
         }
 
-        val fullScreenButton: ImageView = findViewById(R.id.buttonFullScreenToolbar)
+
         fullScreenButton.setOnClickListener {
             setFullscreenButton(fullScreenButton)
             resetHideTopBarCounter()
@@ -293,13 +299,13 @@ class PDFViewer : AppCompatActivity() {
 
         val buttonSinglePage: ImageView = findViewById(R.id.buttonSinglePage)
         buttonSinglePage.setOnClickListener {
-            if (!single_page) {
-                single_page = true
+            if (!singlePage) {
+                singlePage = true
                 pdfViewer.setPageSnap(true)
                 pdfViewer.setPageFling(true)
                 buttonSinglePage.setImageResource(R.drawable.ic_single_page_disabled)
             } else {
-                single_page = false
+                singlePage = false
                 pdfViewer.setPageSnap(false)
                 pdfViewer.setPageFling(false)
                 buttonSinglePage.setImageResource(R.drawable.ic_single_page)
@@ -309,7 +315,7 @@ class PDFViewer : AppCompatActivity() {
             selectPdfFromURI(uriOpened)
         }
         buttonSinglePage.setOnLongClickListener {
-            if (!single_page) showTooltip(R.string.tooltip_single_page_scroll)
+            if (!singlePage) showTooltip(R.string.tooltip_single_page_scroll)
             else showTooltip(R.string.tooltip_single_page_scroll_disabled)
             true
         }
@@ -317,14 +323,14 @@ class PDFViewer : AppCompatActivity() {
 
         val buttonDarkFilter: ImageView = findViewById(R.id.buttonDarkFilter)
         buttonDarkFilter.setOnClickListener {
-            if (!night_mode) {
-                night_mode = true
+            if (!nightMode) {
+                nightMode = true
                 pdfViewer.setNightMode(true)
                 pdfViewer.jumpTo(pdfViewer.currentPage, true)
                 buttonDarkFilter.setImageResource(R.drawable.ic_dark_filter_disabled)
                 pdfViewer.setBackgroundResource(R.color.spacingPageDark)
             } else {
-                night_mode = false
+                nightMode = false
                 pdfViewer.setNightMode(false)
                 pdfViewer.jumpTo(pdfViewer.currentPage, true)
                 buttonDarkFilter.setImageResource(R.drawable.ic_dark_filter)
@@ -334,7 +340,7 @@ class PDFViewer : AppCompatActivity() {
             hideMenuPanel()
         }
         buttonDarkFilter.setOnLongClickListener {
-            if (!night_mode) showTooltip(R.string.tooltip_force_dark_filter)
+            if (!nightMode) showTooltip(R.string.tooltip_force_dark_filter)
             else showTooltip(R.string.tooltip_force_dark_filter_disable)
             true
         }
@@ -423,20 +429,61 @@ class PDFViewer : AppCompatActivity() {
             pdfViewer.fromUri(uri)
                 .enableSwipe(true) //leave as "true" (it causes a bug with scrolling when zoom is "100%")
                 .swipeHorizontal(horizontal) //horizontal scrolling disabled/enabled
-                .enableDoubletap(true)
+                .enableDoubletap(false) // 关闭双击缩放
+                .enableScaletap(false) // 关闭手势缩放
                 //.defaultPage(getPdfPage(uri.toString()))
                 .enableAnnotationRendering(true) // render annotations (such as comments, colors or forms)
-                .password(passwordToUse).scrollHandle(null)
+                .password(passwordToUse)
+                .scrollHandle(null)
                 .enableAntialiasing(true) // improve rendering a little bit on low-res screens
-                .autoSpacing(single_page)
+                .autoSpacing(singlePage)
                 .spacing(5)
-                .pageSnap(single_page)
-                .pageFling(single_page)
-                .nightMode(night_mode)
+                .pageSnap(singlePage)
+                .pageFling(singlePage)
+                .nightMode(nightMode)
+                .setDuration(350) // 设置动画时间
                 .linkHandler(SavPdfViewerLinkHandler(pdfViewer))
 
-                .onTap {
-                    showTopBar()
+                .onTap { e ->
+                    val w = window.decorView.width
+                    val h = window.decorView.height
+                    var wRatio = 1.0 / 3.0
+                    var hRatio = 1.0 / 4.0
+                    var widthRatio = wRatio
+                    var heightRatio = hRatio * 2.0
+                    if (w > h) {
+                        hRatio = wRatio.apply { wRatio = hRatio }
+                        heightRatio = widthRatio.apply { widthRatio = heightRatio }
+                    }
+                    val x = e.x
+                    val y = e.y
+                    val left = (w * wRatio).toInt()
+                    val top = (h * hRatio).toInt()
+                    val rect = Rect(left, top, left+(w * widthRatio).toInt(), top+(h * heightRatio).toInt())
+                    if ((x >= rect.left && x <= rect.right) &&
+                            (y >= rect.top && y <= rect.bottom)) {
+                        showTopBar()
+                        return@onTap true
+                    }
+                    // 判断画面大小，切换上一页，下一页
+                    val next = x > rect.right || y > rect.bottom
+                    var resId = 0
+                    if (next) {
+                        if (pdfViewer.currentPage < pdfViewer.pageCount - 1) {
+                            pdfViewer.jumpTo(pdfViewer.currentPage+1, true)
+                        } else {
+                            resId = R.string.no_next_page
+                        }
+                    } else {
+                        if (pdfViewer.currentPage > 0) {
+                            pdfViewer.jumpTo(pdfViewer.currentPage-1, true)
+                        } else {
+                            resId = R.string.no_previous_page
+                        }
+                    }
+                    if (resId > 0) {
+                        Toast.makeText(baseContext, resId, Toast.LENGTH_SHORT).show()
+                    }
                     true
                 }
                 //.onPageError { page, t -> println(page) }
@@ -507,7 +554,7 @@ class PDFViewer : AppCompatActivity() {
 
                     val residualView: View = findViewById(R.id.residualView)
                     val fullView: View = findViewById(R.id.fullView)
-                    var currentStatus: String
+                    val currentStatus: String
                     val toAddOrRemove = fullView.measuredHeight - residualView.measuredHeight
                     if (nowLandscape == Configuration.ORIENTATION_LANDSCAPE) {
                         currentStatus = "landscape"
@@ -588,7 +635,7 @@ class PDFViewer : AppCompatActivity() {
                         buttonSideScroll.isGone = false
                         buttonBottomScroll.isGone = true
                     }
-                }.onError({
+                }.onError {
                     if (it.message.toString()
                             .contains("Password required or incorrect password.")
                     ) {
@@ -598,7 +645,7 @@ class PDFViewer : AppCompatActivity() {
                         askThePassword(uri, passwordWrong)
                     }
                     //PdfPasswordException
-                }).load()
+                }.load()
         } catch (e: Exception) {
             println("Exception 1")
         }
@@ -1948,12 +1995,12 @@ class PDFViewer : AppCompatActivity() {
     }
 
     private fun zoomIn() {
-        if (pdfViewer.zoom <= (10.0F - zoom_value)) pdfViewer.zoomWithAnimation(pdfViewer.zoom + zoom_value)
+        if (pdfViewer.zoom <= (10.0F - zoomValue)) pdfViewer.zoomWithAnimation(pdfViewer.zoom + zoomValue)
         setCurrentZoomStatus()
     }
 
     private fun zoomOut() {
-        if (pdfViewer.zoom >= (0.0F + zoom_value)) pdfViewer.zoomWithAnimation(pdfViewer.zoom - zoom_value)
+        if (pdfViewer.zoom >= (0.0F + zoomValue)) pdfViewer.zoomWithAnimation(pdfViewer.zoom - zoomValue)
         setCurrentZoomStatus()
     }
 

@@ -65,4 +65,6 @@
     <string name="tooltip_close_bookmarks">Cerrar todos los marcadores</string>
     <string name="tooltip_get_help">Obtener ayuda</string>
     <string name="confirmation_open_link">Do you want to open <b>{{url}}</b> in your browser?</string>
+    <string name="no_previous_page">No previous page</string>
+    <string name="no_next_page">No next page</string>
 </resources>
