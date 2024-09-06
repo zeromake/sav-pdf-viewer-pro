@@ -1,7 +1,6 @@
 package com.saverio.pdfviewer
 
 import RealPathUtil
-import android.R.attr
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
