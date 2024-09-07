@@ -28,9 +28,11 @@ import java.util.List;
 import static com.github.barteksc.pdfviewer.util.Constants.Cache.CACHE_SIZE;
 import static com.github.barteksc.pdfviewer.util.Constants.PRELOAD_OFFSET;
 
+import androidx.annotation.NonNull;
+
 class PagesLoader {
 
-    private PDFView pdfView;
+    private final PDFView pdfView;
     private int cacheOrder;
     private float xOffset;
     private float yOffset;
@@ -41,10 +43,11 @@ class PagesLoader {
     private final RectF thumbnailRect = new RectF(0, 0, 1, 1);
     private final int preloadOffset;
 
-    private class Holder {
+    private static class Holder {
         int row;
         int col;
 
+        @NonNull
         @Override
         public String toString() {
             return "Holder{" +
@@ -54,7 +57,7 @@ class PagesLoader {
         }
     }
 
-    private class RenderRange {
+    private static class RenderRange {
         int page;
         GridSize gridSize;
         Holder leftTop;
@@ -67,6 +70,7 @@ class PagesLoader {
             this.rightBottom = new Holder();
         }
 
+        @NonNull
         @Override
         public String toString() {
             return "RenderRange{" +
@@ -78,10 +82,11 @@ class PagesLoader {
         }
     }
 
-    private class GridSize {
+    private static class GridSize {
         int rows;
         int cols;
 
+        @NonNull
         @Override
         public String toString() {
             return "GridSize{" +

@@ -36,10 +36,7 @@ public class MathUtils {
         if (number <= between) {
             return between;
         }
-        if (number >= and) {
-            return and;
-        }
-        return number;
+        return Math.min(number, and);
     }
 
     /**
@@ -53,38 +50,23 @@ public class MathUtils {
         if (number <= between) {
             return between;
         }
-        if (number >= and) {
-            return and;
-        }
-        return number;
+        return Math.min(number, and);
     }
 
     public static float max(float number, float max) {
-        if (number > max) {
-            return max;
-        }
-        return number;
+        return Math.min(number, max);
     }
 
     public static float min(float number, float min) {
-        if (number < min) {
-            return min;
-        }
-        return number;
+        return Math.max(number, min);
     }
 
     public static int max(int number, int max) {
-        if (number > max) {
-            return max;
-        }
-        return number;
+        return Math.min(number, max);
     }
 
     public static int min(int number, int min) {
-        if (number < min) {
-            return min;
-        }
-        return number;
+        return Math.max(number, min);
     }
 
     /**

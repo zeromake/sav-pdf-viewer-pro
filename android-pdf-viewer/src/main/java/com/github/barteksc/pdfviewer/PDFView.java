@@ -36,6 +36,8 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.widget.RelativeLayout;
 
+import androidx.annotation.NonNull;
+
 import com.github.barteksc.pdfviewer.exception.PageRenderingException;
 import com.github.barteksc.pdfviewer.link.DefaultLinkHandler;
 import com.github.barteksc.pdfviewer.link.LinkHandler;
@@ -535,17 +537,12 @@ public class PDFView extends RelativeLayout {
         if (swipeVertical) {
             if (direction < 0 && currentXOffset < 0) {
                 return true;
-            } else if (direction > 0 && currentXOffset + toCurrentScale(pdfFile.getMaxPageWidth()) > getWidth()) {
-                return true;
-            }
+            } else return direction > 0 && currentXOffset + toCurrentScale(pdfFile.getMaxPageWidth()) > getWidth();
         } else {
             if (direction < 0 && currentXOffset < 0) {
                 return true;
-            } else if (direction > 0 && currentXOffset + pdfFile.getDocLen(zoom) > getWidth()) {
-                return true;
-            }
+            } else return direction > 0 && currentXOffset + pdfFile.getDocLen(zoom) > getWidth();
         }
-        return false;
     }
 
     @Override
@@ -557,21 +554,16 @@ public class PDFView extends RelativeLayout {
         if (swipeVertical) {
             if (direction < 0 && currentYOffset < 0) {
                 return true;
-            } else if (direction > 0 && currentYOffset + pdfFile.getDocLen(zoom) > getHeight()) {
-                return true;
-            }
+            } else return direction > 0 && currentYOffset + pdfFile.getDocLen(zoom) > getHeight();
         } else {
             if (direction < 0 && currentYOffset < 0) {
                 return true;
-            } else if (direction > 0 && currentYOffset + toCurrentScale(pdfFile.getMaxPageHeight()) > getHeight()) {
-                return true;
-            }
+            } else return direction > 0 && currentYOffset + toCurrentScale(pdfFile.getMaxPageHeight()) > getHeight();
         }
-        return false;
     }
 
     @Override
-    protected void onDraw(Canvas canvas) {
+    protected void onDraw(@NonNull Canvas canvas) {
         if (isInEditMode()) {
             return;
         }
@@ -837,7 +829,7 @@ public class PDFView extends RelativeLayout {
             // Check X offset
             float scaledPageWidth = toCurrentScale(pdfFile.getMaxPageWidth());
             if (scaledPageWidth < getWidth()) {
-                offsetX = getWidth() / 2 - scaledPageWidth / 2;
+                offsetX = (float) getWidth() / 2 - scaledPageWidth / 2;
             } else {
                 if (offsetX > 0) {
                     offsetX = 0;
@@ -869,7 +861,7 @@ public class PDFView extends RelativeLayout {
             // Check Y offset
             float scaledPageHeight = toCurrentScale(pdfFile.getMaxPageHeight());
             if (scaledPageHeight < getHeight()) {
-                offsetY = getHeight() / 2 - scaledPageHeight / 2;
+                offsetY = (float) getHeight() / 2 - scaledPageHeight / 2;
             } else {
                 if (offsetY > 0) {
                     offsetY = 0;

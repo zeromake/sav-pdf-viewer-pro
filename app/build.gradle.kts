@@ -39,9 +39,9 @@ android {
 }
 
 dependencies {
+    implementation(project(":android-pdf-viewer"))
 
     val kotlin_version = "1.9.22"
-
     implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version")
     implementation("androidx.core:core-ktx:1.13.1")
     implementation("androidx.appcompat:appcompat:1.7.0")
@@ -50,8 +50,6 @@ dependencies {
     implementation("androidx.vectordrawable:vectordrawable:1.2.0")
 
     val navigation_version = "2.8.0"
-    implementation("androidx.navigation:navigation-fragment-ktx:$navigation_version")
-    implementation("androidx.navigation:navigation-ui-ktx:$navigation_version")
     implementation("androidx.navigation:navigation-fragment-ktx:$navigation_version")
     implementation("androidx.navigation:navigation-ui-ktx:$navigation_version")
 
@@ -63,7 +61,4 @@ dependencies {
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
-
-    implementation(project(":android-pdf-viewer"))
-//Use "2.8.2" is stable | "3.1.0-beta.1" is unstable
 }

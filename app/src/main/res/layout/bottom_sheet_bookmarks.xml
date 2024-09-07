@@ -15,7 +15,7 @@
         android:layout_margin="10dp"
         android:contentDescription="@string/tooltip_close_bookmarks"
         android:src="@drawable/border_rounded"
-        android:tint="@color/light_red" />
+        app:tint="@color/light_red" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/constraintMessageGuide"
@@ -68,7 +68,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="5dp"
-                android:layout_marginRight="5dp"
                 android:layout_marginBottom="5dp"
                 android:background="@drawable/button_rounded"
                 android:contentDescription="@string/tooltip_close_panel"

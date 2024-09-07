@@ -20,13 +20,13 @@ import android.graphics.RectF;
 
 public class PagePart {
 
-    private int page;
+    private final int page;
 
-    private Bitmap renderedBitmap;
+    private final Bitmap renderedBitmap;
 
-    private RectF pageRelativeBounds;
+    private final RectF pageRelativeBounds;
 
-    private boolean thumbnail;
+    private final boolean thumbnail;
 
     private int cacheOrder;
 
@@ -65,11 +65,10 @@ public class PagePart {
 
     @Override
     public boolean equals(Object obj) {
-        if (!(obj instanceof PagePart)) {
+        if (!(obj instanceof PagePart part)) {
             return false;
         }
 
-        PagePart part = (PagePart) obj;
         return part.getPage() == page
                 && part.getPageRelativeBounds().left == pageRelativeBounds.left
                 && part.getPageRelativeBounds().right == pageRelativeBounds.right

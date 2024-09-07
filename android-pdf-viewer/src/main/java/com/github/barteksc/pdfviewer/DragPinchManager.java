@@ -57,6 +57,7 @@ class DragPinchManager implements GestureDetector.OnGestureListener, GestureDete
         this.duration = duration;
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     DragPinchManager(PDFView pdfView, AnimationManager animationManager) {
         this.pdfView = pdfView;
         this.animationManager = animationManager;
@@ -169,13 +170,13 @@ class DragPinchManager implements GestureDetector.OnGestureListener, GestureDete
     }
 
     @Override
-    public boolean onDown(MotionEvent e) {
+    public boolean onDown(@NonNull MotionEvent e) {
         animationManager.stopFling();
         return true;
     }
 
     @Override
-    public void onShowPress(MotionEvent e) {
+    public void onShowPress(@NonNull MotionEvent e) {
 
     }
 

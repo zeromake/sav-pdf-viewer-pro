@@ -15,9 +15,11 @@ import android.os.Looper
 import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.View
+import android.view.ViewGroup
 import android.view.WindowManager
 import android.view.inputmethod.InputMethodManager
 import android.widget.*
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
@@ -35,10 +37,12 @@ import com.saverio.pdfviewer.db.DatabaseHandler
 import com.saverio.pdfviewer.db.FilesModel
 import com.saverio.pdfviewer.ui.BookmarksItemAdapter
 import com.saverio.pdfviewer.ui.SavPdfViewerLinkHandler
+import com.shockwave.pdfium.PdfDocument
 import java.net.URLDecoder
 import java.security.MessageDigest
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.collections.ArrayList
 
 
 class PDFViewer : AppCompatActivity() {
@@ -90,6 +94,8 @@ class PDFViewer : AppCompatActivity() {
     private var minPositionScrollbarHorizontal: Float = 0F
     private var maxPositionScrollbarHorizontal: Float = 0F
     private var startX = 0F
+    private var tocEntries: ArrayList<TocEntry>? = null
+    private var tocDialog: AlertDialog? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -237,7 +243,8 @@ class PDFViewer : AppCompatActivity() {
 
         val helpButton: ImageView = findViewById(R.id.buttonGetHelpToolbar)
         helpButton.setOnClickListener {
-            openGetHelp()
+//            openGetHelp()
+            openToc()
             resetHideTopBarCounter()
             hideMenuPanel()
         }
@@ -417,6 +424,16 @@ class PDFViewer : AppCompatActivity() {
         hideTopBarCounter = 0
     }
 
+    private fun convertTocEntries(entries: List<PdfDocument.Bookmark>, level: Int) {
+        if (this.tocEntries == null || level > 2) return
+        for (item in entries) {
+            this.tocEntries!!.add(TocEntry(item.title, item.pageIdx, level))
+            if (item.hasChildren()) {
+                convertTocEntries(item.children, level+1)
+            }
+        }
+    }
+
     private fun selectPdfFromURI(uri: Uri?) {
         try {
             //Toast.makeText(this, fileOpened, Toast.LENGTH_LONG).show()
@@ -528,6 +545,8 @@ class PDFViewer : AppCompatActivity() {
                 }
                 .onLoad {
                     lastPosition = getPdfPage(fileId)
+                    this.tocEntries = ArrayList()
+                    convertTocEntries(pdfViewer.tableOfContents, 0)
                     /*pdfViewer.positionOffset = 1F
                     totalPages = pdfViewer.currentPage + 1*/
                     //TODO
@@ -617,7 +636,7 @@ class PDFViewer : AppCompatActivity() {
                     }
                     pdfViewer.fitToWidth(0)
                     pdfViewer.jumpTo(lastPosition, false)
-                    if (lastPosition.toString() == "0") {
+                    if (lastPosition == 0) {
                         showTopBar(showGoTop = false)
                     } else {
                         hideTopBar()
@@ -2016,5 +2035,43 @@ class PDFViewer : AppCompatActivity() {
                 "%d",
                 ((pdfViewer.zoom * 100).toInt().toString())
             )
+    }
+
+    private fun openToc() {
+        if (this.tocDialog != null) {
+            this.tocDialog!!.dismiss()
+            this.tocDialog = null
+            return
+        }
+        val ctx = this
+        val tocView = layoutInflater.inflate(R.layout.toc, null)
+        val listView = tocView.findViewById<ListView>(R.id.toc)
+        val adapter = object : ArrayAdapter<TocEntry>(ctx, android.R.layout.simple_list_item_1,
+            this.tocEntries!!
+        ) {
+            override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+                val view = super.getView(position, convertView, parent)
+                val entry = getItem(position)
+                val textView = view.findViewById<TextView>(android.R.id.text1)
+                textView.setPadding(entry?.level?.times(30) ?: 0, 0, 0, 0)
+                textView.text = entry?.title
+                textView.setOnClickListener {
+                    ctx.tocDialog?.dismiss()
+                    ctx.tocDialog = null
+                    ctx.pdfViewer.jumpTo(entry!!.idx.toInt(), false)
+                }
+                return view
+            }
+        }
+        listView.adapter = adapter
+        val builder = AlertDialog.Builder(ctx)
+            .setTitle(resources.getString(R.string.toc_title))
+            .setView(tocView)
+            .setPositiveButton(resources.getString(R.string.toc_close)) { dialog, _ ->
+                dialog.dismiss()
+                this.tocDialog = null
+            }
+        tocDialog = builder.create()
+        tocDialog!!.show()
     }
 }

@@ -105,6 +105,7 @@ class DatabaseHandler(context: Context) :
                 filesList.add(fileToAdd)
             } while (cursor.moveToNext())
         }
+        cursor.close()
         database.close()
         return filesList
     }
@@ -167,7 +168,7 @@ class DatabaseHandler(context: Context) :
             returnValue = true
         }
         //println("Exist YES/NO: ${returnValue.toString()}")
-
+        cursor.close()
         database.close()
         return returnValue
     }
@@ -232,6 +233,7 @@ class DatabaseHandler(context: Context) :
                 filesList.add(fileToAdd)
             } while (cursor.moveToNext())
         }
+        cursor.close()
         database.close()
         return filesList
     }
@@ -294,6 +296,7 @@ class DatabaseHandler(context: Context) :
         }
         //println("Exist bookmark YES/NO: ${returnValue.toString()}")
 
+        cursor.close()
         database.close()
         return returnValue
     }
@@ -317,6 +320,8 @@ class DatabaseHandler(context: Context) :
         if (cursor.moveToFirst()) {
             valueToReturn = cursor.getInt(cursor.getColumnIndex(COLUMN_ID_PK_BOOKMARKS)) + 1
         }
+        cursor.close()
+        database.close()
         return valueToReturn
     }
     //End || Bookmarks

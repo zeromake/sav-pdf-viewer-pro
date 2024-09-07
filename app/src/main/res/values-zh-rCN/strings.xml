@@ -67,4 +67,6 @@
     <string name="confirmation_open_link">使用浏览器打开 <b>{{url}}</b> ?</string>
     <string name="no_previous_page">没有上一页</string>
     <string name="no_next_page">没有下一页</string>
+    <string name="toc_title">目录</string>
+    <string name="toc_close">关闭目录</string>
 </resources>

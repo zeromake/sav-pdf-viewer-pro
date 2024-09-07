@@ -10,7 +10,8 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_new_icon_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.SavPDFViewer">
+        android:theme="@style/Theme.SavPDFViewer"
+        android:name=".App">
         <activity
             android:name=".PDFViewer"
             android:configChanges="orientation|screenSize"

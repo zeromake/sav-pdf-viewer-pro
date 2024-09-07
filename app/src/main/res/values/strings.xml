@@ -79,4 +79,6 @@
     <string name="confirmation_open_link">Do you want to open <b>{{url}}</b> in your browser?</string>
     <string name="no_previous_page">No previous page</string>
     <string name="no_next_page">No next page</string>
+    <string name="toc_title">TOC</string>
+    <string name="toc_close">Close TOC</string>
 </resources>

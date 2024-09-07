@@ -28,12 +28,12 @@ class DecodingAsyncTask extends AsyncTask<Void, Void, Throwable> {
 
     private boolean cancelled;
 
-    private WeakReference<PDFView> pdfViewReference;
+    private final WeakReference<PDFView> pdfViewReference;
 
-    private PdfiumCore pdfiumCore;
-    private String password;
-    private DocumentSource docSource;
-    private int[] userPages;
+    private final PdfiumCore pdfiumCore;
+    private final String password;
+    private final DocumentSource docSource;
+    private final int[] userPages;
     private PdfFile pdfFile;
 
     DecodingAsyncTask(DocumentSource docSource, String password, int[] userPages, PDFView pdfView, PdfiumCore pdfiumCore) {
