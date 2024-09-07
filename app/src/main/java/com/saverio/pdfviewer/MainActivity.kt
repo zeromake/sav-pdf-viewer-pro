@@ -50,7 +50,7 @@ class MainActivity : AppCompatActivity() {
         val recentFiles: String? =
             getSharedPreferences(RECENT_FILES, Context.MODE_PRIVATE).getString(RECENT_FILES, "")
         var recentFilesToSave = ""
-        var recentFilesParts = recentFiles?.split("/:::/")
+        val recentFilesParts = recentFiles?.split("/:::/")
         var i = 0
         var addedI = 0
         while (i < recentFilesParts!!.size) {

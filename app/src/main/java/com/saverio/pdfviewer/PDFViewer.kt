@@ -21,6 +21,7 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
@@ -332,12 +333,14 @@ class PDFViewer : AppCompatActivity() {
         buttonDarkFilter.setOnClickListener {
             if (!nightMode) {
                 nightMode = true
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
                 pdfViewer.setNightMode(true)
                 pdfViewer.jumpTo(pdfViewer.currentPage, true)
                 buttonDarkFilter.setImageResource(R.drawable.ic_dark_filter_disabled)
                 pdfViewer.setBackgroundResource(R.color.spacingPageDark)
             } else {
                 nightMode = false
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
                 pdfViewer.setNightMode(false)
                 pdfViewer.jumpTo(pdfViewer.currentPage, true)
                 buttonDarkFilter.setImageResource(R.drawable.ic_dark_filter)
@@ -462,6 +465,11 @@ class PDFViewer : AppCompatActivity() {
                 .linkHandler(SavPdfViewerLinkHandler(pdfViewer))
 
                 .onTap { e ->
+                    if (menuOpened) {
+                        // 强制有其它面板需要关闭才能继续
+                        hideMenuPanel()
+                        return@onTap true
+                    }
                     val w = window.decorView.width
                     val h = window.decorView.height
                     var wRatio = 1.0 / 3.0
@@ -2046,13 +2054,13 @@ class PDFViewer : AppCompatActivity() {
         val ctx = this
         val tocView = layoutInflater.inflate(R.layout.toc, null)
         val listView = tocView.findViewById<ListView>(R.id.toc)
-        val adapter = object : ArrayAdapter<TocEntry>(ctx, android.R.layout.simple_list_item_1,
+        val adapter = object : ArrayAdapter<TocEntry>(ctx, R.layout.toc_item,
             this.tocEntries!!
         ) {
             override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
                 val view = super.getView(position, convertView, parent)
                 val entry = getItem(position)
-                val textView = view.findViewById<TextView>(android.R.id.text1)
+                val textView = view.findViewById<TextView>(R.id.toc_text)
                 textView.setPadding(entry?.level?.times(30) ?: 0, 0, 0, 0)
                 textView.text = entry?.title
                 textView.setOnClickListener {
