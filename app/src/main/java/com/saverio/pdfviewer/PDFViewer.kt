@@ -868,7 +868,7 @@ class PDFViewer : AppCompatActivity() {
                     println("!! Exception 01 !!$e")
                 }
                 lifecycleScope.launch {
-                    uriComputeHash = RealPathUtil.computeHash(this@PDFViewer, uriOpened!!)
+                    uriComputeHash = RealPathUtil.computeHash(this@PDFViewer, uriOpened!!, fileOpened)
                 }
                 shareButton.isGone = false
                 fullscreenButton.isGone = false

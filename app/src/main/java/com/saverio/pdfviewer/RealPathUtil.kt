@@ -372,19 +372,22 @@ object RealPathUtil {
         return file.path
     }
 
-    suspend fun computeHash(context: Context, uri: Uri): String? {
+    suspend fun computeHash(context: Context, uri: Uri, filename: String?): String? {
         return try {
-            val digester = MessageDigest.getInstance("MD5")
-                // Perform IO operations on the IO dispatcher
-                withContext(Dispatchers.IO) {
-                    val inputStream = context.contentResolver.openInputStream(uri) ?: return@withContext null
-                    inputStream.use { stream ->
-                        val buffer = ByteArray(1024 * 1024)
-                        val amountRead = stream.read(buffer)
-                        if (amountRead == -1) return@withContext null
-                        digester.update(buffer, 0, amountRead)
-                    }
+            val digester = MessageDigest.getInstance("SHA256")
+            if (!filename.isNullOrEmpty()) {
+                digester.update(filename.toByteArray())
+            }
+            // Perform IO operations on the IO dispatcher
+            withContext(Dispatchers.IO) {
+                val inputStream = context.contentResolver.openInputStream(uri) ?: return@withContext null
+                inputStream.use { stream ->
+                    val buffer = ByteArray(1024 * 1024)
+                    val amountRead = stream.read(buffer)
+                    if (amountRead == -1) return@withContext null
+                    digester.update(buffer, 0, amountRead)
                 }
+            }
             val hash = String.format("%032x", BigInteger(1, digester.digest()))
             hash
         } catch (e: NoSuchAlgorithmException) {
