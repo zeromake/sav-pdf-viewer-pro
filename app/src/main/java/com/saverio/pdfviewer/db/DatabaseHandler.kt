@@ -7,8 +7,6 @@ import android.database.Cursor
 import android.database.SQLException
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
-import java.text.SimpleDateFormat
-import java.util.*
 import kotlin.collections.ArrayList
 
 class DatabaseHandler(context: Context) :
@@ -23,7 +21,8 @@ class DatabaseHandler(context: Context) :
                 "  `${COLUMN_LAST_UPDATE_FILES}` TEXT NOT NULL," +
                 "  `${COLUMN_FILE_PATH_FILES}` TEXT NOT NULL," +
                 "  `${COLUMN_LAST_PAGE_FILES}` INTEGER NOT NULL," +
-                "  `${COLUMN_NOTES_FILES}` TEXT NOT NULL" +
+                "  `${COLUMN_NOTES_FILES}` TEXT NOT NULL," +
+                "  `${COLUMN_URI_FILES}` TEXT NOT NULL" +
                 ")"
         database.execSQL(query)
 
@@ -57,6 +56,7 @@ class DatabaseHandler(context: Context) :
         contentValues.put(COLUMN_LAST_PAGE_FILES, file.lastPage)
         contentValues.put(COLUMN_FILE_PATH_FILES, file.path)
         contentValues.put(COLUMN_NOTES_FILES, file.notes)
+        contentValues.put(COLUMN_URI_FILES, file.uri)
         val success = database.insert(TABLE_NAME_FILES, null, contentValues)
         database.close()
 
@@ -90,6 +90,7 @@ class DatabaseHandler(context: Context) :
                 val path = cursor.getString(cursor.getColumnIndex(COLUMN_FILE_PATH_FILES))
                 val lastPage = cursor.getInt(cursor.getColumnIndex(COLUMN_LAST_PAGE_FILES))
                 val notes = cursor.getString(cursor.getColumnIndex(COLUMN_NOTES_FILES))
+                val uri = cursor.getString(cursor.getColumnIndex(COLUMN_URI_FILES))
 
                 val fileToAdd = FilesModel(
                     id = id,
@@ -97,7 +98,8 @@ class DatabaseHandler(context: Context) :
                     lastUpdate = lastUpdate,
                     path = path,
                     lastPage = lastPage,
-                    notes = notes
+                    notes = notes,
+                    uri = uri,
                 )
 
                 //println("Get ${id}")
@@ -120,6 +122,7 @@ class DatabaseHandler(context: Context) :
         contentValues.put(COLUMN_FILE_PATH_FILES, file.path)
         contentValues.put(COLUMN_LAST_PAGE_FILES, file.lastPage)
         contentValues.put(COLUMN_NOTES_FILES, file.notes)
+        contentValues.put(COLUMN_URI_FILES, file.uri)
 
         val success =
             database.update(
@@ -352,7 +355,7 @@ class DatabaseHandler(context: Context) :
     companion object {
         //general
         private val DATABASE_NAME = "PDFFiles"
-        private val DATABASE_VERSION = 2 //TODO: change this manually
+        private val DATABASE_VERSION = 3 //TODO: change this manually
 
         //"files" table
         val TABLE_NAME_FILES = "files"
@@ -362,6 +365,7 @@ class DatabaseHandler(context: Context) :
         val COLUMN_LAST_UPDATE_FILES = "last_update"
         val COLUMN_LAST_PAGE_FILES = "page"
         val COLUMN_NOTES_FILES = "notes"
+        val COLUMN_URI_FILES = "uri"
 
         //"bookmarks" table
         val TABLE_NAME_BOOKMARKS = "bookmarks"

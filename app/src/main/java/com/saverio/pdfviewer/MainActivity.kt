@@ -67,7 +67,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun openPDFFile() {
-        val intent = Intent(this@MainActivity, PDFViewer::class.java)
+        val intent = Intent(this, PDFViewer::class.java)
         val uriToOpen = Bundle()
         uriToOpen.putString("uri", "") //Your id
         intent.putExtras(uriToOpen) //Put your id to your next Intent

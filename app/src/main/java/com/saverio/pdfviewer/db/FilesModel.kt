@@ -6,5 +6,6 @@ class FilesModel(
     var lastUpdate: String = "",
     var path: String = "",
     var lastPage: Int = 0,
-    var notes: String = ""
+    var notes: String = "",
+    var uri: String = ""
 )

@@ -245,13 +245,13 @@
 
         <TextView
             android:id="@+id/titleToolbar"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="56dp"
-            android:background="@color/dark_red"
+            android:background="@color/transparent"
             android:gravity="start|center_vertical"
             android:paddingStart="10dp"
             android:paddingEnd="10dp"
-            android:textColor="@color/white"
+            android:textColor="?attr/colorOnPrimary"
             android:textSize="20sp"
             android:textStyle="normal"
             android:visibility="gone"

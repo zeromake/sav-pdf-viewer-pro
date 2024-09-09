@@ -1,6 +1,5 @@
 package com.saverio.pdfviewer
 
-import RealPathUtil
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
@@ -19,6 +18,7 @@ import android.view.ViewGroup
 import android.view.WindowManager
 import android.view.inputmethod.InputMethodManager
 import android.widget.*
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
@@ -29,6 +29,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.core.view.isGone
 import androidx.core.widget.addTextChangedListener
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.github.barteksc.pdfviewer.PDFView
@@ -39,6 +40,7 @@ import com.saverio.pdfviewer.db.FilesModel
 import com.saverio.pdfviewer.ui.BookmarksItemAdapter
 import com.saverio.pdfviewer.ui.SavPdfViewerLinkHandler
 import com.shockwave.pdfium.PdfDocument
+import kotlinx.coroutines.launch
 import java.net.URLDecoder
 import java.security.MessageDigest
 import java.text.SimpleDateFormat
@@ -53,6 +55,7 @@ class PDFViewer : AppCompatActivity() {
     private var fileOpened: String? = ""
     private var fileId: String = ""
     private var uriOpened: Uri? = null
+    private var uriComputeHash: String? = null
 
     private val timesAfterOpenReviewMessage = 500
     private val timesAfterShowFollowApp = 5
@@ -127,7 +130,9 @@ class PDFViewer : AppCompatActivity() {
             //println(intent.data)
 
             try {
-                fileOpened = RealPathUtil.getRealPath(this, intent.data!!)
+                if (intent.data != null) {
+                    fileOpened = RealPathUtil.getRealPath(this, intent.data!!)
+                }
                 //println("File opened\t" + fileOpened)
             } catch (e: Exception) {
                 println("Exception Z2\n" + e.message)
@@ -138,7 +143,7 @@ class PDFViewer : AppCompatActivity() {
             println("Exception Z1\n" + e.message)
             uriToUse = ""
         }
-        if (fileOpened == null) {
+        if (fileOpened == null && intent.data != null) {
             try {
                 val tempUrl = URLDecoder.decode(intent.data.toString(), "UTF-8").split("/")
                 fileOpened = ""
@@ -146,7 +151,7 @@ class PDFViewer : AppCompatActivity() {
                 tempUrl.forEach {
                     if (storageFound || it == "storage") {
                         storageFound = true
-                        fileOpened += "/" + it
+                        fileOpened += "/$it"
                     }
                 }
 
@@ -402,13 +407,31 @@ class PDFViewer : AppCompatActivity() {
     }
 
     private fun selectPdfFromStorage() {
-        val browserStorage = Intent(Intent.ACTION_GET_CONTENT)
-        browserStorage.type = "application/pdf"
-        browserStorage.addCategory(Intent.CATEGORY_OPENABLE)
-        startActivityForResult(
-            Intent.createChooser(browserStorage, getString(R.string.select_file_intent)),
-            PDF_SELECTION_CODE
-        )
+//        val browserStorage = Intent(Intent.ACTION_OPEN_DOCUMENT)
+//        browserStorage.type = "application/pdf"
+//        browserStorage.addCategory(Intent.CATEGORY_OPENABLE)
+//        browserStorage.putExtras(Intent.EXTRA_MIME_TYPES, arrayOf(
+//
+//        ))
+        this.registerForActivityResult(ActivityResultContracts.OpenDocument()) {
+            this.wrapActivityResult(it)
+        }.launch(arrayOf(
+            "application/pdf", // .pdf
+        ));
+//        startActivityForResult(
+//            Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+//                addCategory(Intent.CATEGORY_OPENABLE)
+//                type = "*/*"
+//                putExtra(Intent.EXTRA_MIME_TYPES, arrayOf(
+//                    "application/pdf", // .pdf
+//                ))
+//            },
+//            PDF_SELECTION_CODE
+//        )
+//        startActivityForResult(
+//            Intent.createChooser(browserStorage, getString(R.string.select_file_intent)),
+//            PDF_SELECTION_CODE
+//        )
     }
 
     private fun incrementHideTopBarCounter() {
@@ -821,58 +844,48 @@ class PDFViewer : AppCompatActivity() {
         super.onConfigurationChanged(newConfig)
     }
 
-    @Deprecated("Deprecated in Java")
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-
-        if (requestCode == PDF_SELECTION_CODE && resultCode == Activity.RESULT_OK && data != null) {
-            try {
-                val selectedPdf = data.data
-
-
-                val shareButton: ImageView = findViewById(R.id.buttonShareToolbar)
-                val fullscreenButton: ImageView = findViewById(R.id.buttonFullScreenToolbar)
-                val goTopButton: ImageView = findViewById(R.id.buttonGoTopToolbar)
-                val openButton: ImageView = findViewById(R.id.buttonOpenToolbar)
-                val menuButton: ImageView = findViewById(R.id.buttonMenuToolbar)
-                val bookmarkButton: ImageView = findViewById(R.id.buttonBookmarkToolbar)
-                val zoomInButton: ImageView = findViewById(R.id.buttonZoomInToolbar)
-                val resetZoomButton: TextView = findViewById(R.id.buttonResetZoomToolbar)
-                val zoomOutButton: ImageView = findViewById(R.id.buttonZoomOutToolbar)
-                shareButton.isGone = true
-                menuButton.isGone = true
-                fullscreenButton.isGone = true
-                bookmarkButton.isGone = true
-                uriOpened = selectedPdf
-                if (uriOpened != null) {
-                    try {
-                        fileOpened = RealPathUtil.getRealPath(this, uriOpened!!)
-                    } catch (e: Exception) {
-                        //println("!! Exception 01 !!")
-                    }
-                    shareButton.isGone = false
-                    fullscreenButton.isGone = false
-                    if (isSupportedGoTop) goTopButton.isGone = false
-                    isSupportedShareFeature = true
-                    openButton.isGone = false
-                    bookmarkButton.isGone = false
+    private fun wrapActivityResult(selectedPdf: Uri?) {
+        try {
+            val shareButton: ImageView = findViewById(R.id.buttonShareToolbar)
+            val fullscreenButton: ImageView = findViewById(R.id.buttonFullScreenToolbar)
+            val goTopButton: ImageView = findViewById(R.id.buttonGoTopToolbar)
+            val openButton: ImageView = findViewById(R.id.buttonOpenToolbar)
+            val menuButton: ImageView = findViewById(R.id.buttonMenuToolbar)
+            val bookmarkButton: ImageView = findViewById(R.id.buttonBookmarkToolbar)
+//            val zoomInButton: ImageView = findViewById(R.id.buttonZoomInToolbar)
+//            val resetZoomButton: TextView = findViewById(R.id.buttonResetZoomToolbar)
+//            val zoomOutButton: ImageView = findViewById(R.id.buttonZoomOutToolbar)
+            shareButton.isGone = true
+            menuButton.isGone = true
+            fullscreenButton.isGone = true
+            bookmarkButton.isGone = true
+            uriOpened = selectedPdf
+            if (uriOpened != null) {
+                try {
+                    fileOpened = RealPathUtil.getRealPath(this, uriOpened!!)
+                    setTitle(getTheFileName(fileOpened!!))
+                } catch (e: Exception) {
+                    println("!! Exception 01 !!$e")
                 }
-                val pagesNumber: TextView = findViewById(R.id.totalPagesToolbar)
-                pagesNumber.isGone = true
-
-                //setTitle(getTheFileName(selectedPdf.toString(), -1))
-
-                selectPdfFromURI(selectedPdf)
-            } catch (e: Exception) {
-                println("Exception 4: Loading failed")
+                lifecycleScope.launch {
+                    uriComputeHash = RealPathUtil.computeHash(this@PDFViewer, uriOpened!!)
+                }
+                shareButton.isGone = false
+                fullscreenButton.isGone = false
+                if (isSupportedGoTop) goTopButton.isGone = false
+                isSupportedShareFeature = true
+                openButton.isGone = false
+                bookmarkButton.isGone = false
             }
-        } else {
-            //file not selected
-            finish()
+            val pagesNumber: TextView = findViewById(R.id.totalPagesToolbar)
+            pagesNumber.isGone = true
+            selectPdfFromURI(selectedPdf)
+        } catch (e: Exception) {
+            println("Exception 4: Loading failed $e")
         }
     }
 
-    fun setTitle(title: String) {
+    private fun setTitle(title: String) {
         val titleElement: TextView = findViewById(R.id.titleToolbar)
         var titleTemp = title
         if (titleTemp.length > 40) {
@@ -881,27 +894,28 @@ class PDFViewer : AppCompatActivity() {
             )
         }
         titleElement.text = titleTemp
+        titleElement.isGone = false
     }
 
     @SuppressLint("SetTextI18n")
     private fun updatePdfPage(pathName: String, currentPage: Int) {
-        val pathNameTemp = getTheFileName(pathName, 0).toMD5() //file-id
         val databaseHandler = DatabaseHandler(this)
-        if (databaseHandler.checkFile(id = pathNameTemp)) {
+        if (databaseHandler.checkFile(id = uriComputeHash!!)) {
             //already exists -> update
-            val file = databaseHandler.getFiles(id = pathNameTemp)[0]
+            val file = databaseHandler.getFiles(id = uriComputeHash!!)[0]
             file.lastPage = currentPage //update the lastPage variable
             file.lastUpdate = getNow() //update the lastUpdate variable
             databaseHandler.updateFile(file = file)
         } else {
             //not exists -> add
             val file = FilesModel(
-                id = pathNameTemp,
+                id = uriComputeHash!!,
                 date = getNow(),
                 lastUpdate = getNow(),
                 path = pathName,
                 lastPage = currentPage,
-                notes = ""
+                notes = "",
+                uri = uriOpened.toString()
             )
             databaseHandler.add(file = file)
         }
@@ -921,19 +935,18 @@ class PDFViewer : AppCompatActivity() {
     }
 
     private fun updateButtonBookmark(pathName: String, currentPage: Int) {
-        val pathNameTemp = getTheFileName(pathName, 0).toMD5() //file-id
         val bookmarkButton: ImageView = findViewById(R.id.buttonBookmarkToolbar)
 
         val databaseHandler = DatabaseHandler(this)
 
-        if (databaseHandler.checkBookmark(fileId = pathNameTemp, page = currentPage)) {
+        if (databaseHandler.checkBookmark(fileId = uriComputeHash!!, page = currentPage)) {
             //there is the bookmark
             bookmarkButton.setImageResource(R.drawable.ic_yes_bookmark)
             bookmarkButton.setOnClickListener {
                 //remove bookmark
                 databaseHandler.deleteBookmark(
                     databaseHandler.getBookmarks(
-                        fileId = pathNameTemp, page = currentPage
+                        fileId = uriComputeHash!!, page = currentPage
                     )[0].id!!
                 )
                 //Toast.makeText(this, getString(R.string.toast_bookmark_removed), Toast.LENGTH_SHORT).show()
@@ -945,7 +958,7 @@ class PDFViewer : AppCompatActivity() {
             bookmarkButton.setOnClickListener {
                 //add bookmark
                 val bookmark = BookmarksModel(
-                    id = null, date = getNow(), file = pathNameTemp, page = currentPage, ""
+                    id = null, date = getNow(), file = fileOpened!!, page = currentPage, ""
                 )
                 databaseHandler.add(bookmark = bookmark)
                 //Toast.makeText(this, getString(R.string.toast_bookmark_added), Toast.LENGTH_SHORT).show()
@@ -973,9 +986,8 @@ class PDFViewer : AppCompatActivity() {
     }
 
     private fun showAllBookmarks(pathName: String) {
-        val pathNameTemp = getTheFileName(pathName, 0).toMD5() //file-id
         val databaseHandler = DatabaseHandler(this)
-        val bookmarks = databaseHandler.getBookmarks(fileId = pathNameTemp)
+        val bookmarks = databaseHandler.getBookmarks(fileId = uriComputeHash!!)
         dialog = BottomSheetDialog(this)
         val view = layoutInflater.inflate(R.layout.bottom_sheet_bookmarks, null)
         view.setBackgroundResource(R.drawable.border_bottomsheet)
@@ -1039,11 +1051,10 @@ class PDFViewer : AppCompatActivity() {
     }
 
     private fun getPdfPage(pathName: String): Int {
-        val pathNameTemp = getTheFileName(pathName, 0).toMD5() //file-id
         //return getSharedPreferences(pathNameTemp, Context.MODE_PRIVATE).getInt(pathNameTemp, 0)
         val databaseHandler = DatabaseHandler(this)
-        return if (databaseHandler.checkFile(pathNameTemp)) {
-            databaseHandler.getFiles(id = pathNameTemp)[0].lastPage
+        return if (databaseHandler.checkFile(uriComputeHash!!)) {
+            databaseHandler.getFiles(id = uriComputeHash!!)[0].lastPage
         } else {
             0
         }
@@ -1090,11 +1101,6 @@ class PDFViewer : AppCompatActivity() {
         return ""
     }
 
-    private fun String.toMD5(): String {
-        val bytes = MessageDigest.getInstance("MD5").digest(this.toByteArray())
-        return bytes.toHex()
-    }
-
     private fun ByteArray.toHex(): String {
         return joinToString("") { "%02x".format(it) }
     }
@@ -1136,6 +1142,7 @@ class PDFViewer : AppCompatActivity() {
     fun showTopBar(showGoTop: Boolean = true, x: Float = 0F, y: Float = 0F) {
         val toolbar: View = findViewById(R.id.toolbar)
         val toolbarInvisible: View = findViewById(R.id.toolbarInvisible)
+        val toolbarTitle: TextView = findViewById(R.id.titleToolbar)
         val buttonClose: ImageView = findViewById(R.id.buttonGoBackToolbar)
         val buttonShare: ImageView = findViewById(R.id.buttonShareToolbar)
         val buttonFullscreen: ImageView = findViewById(R.id.buttonFullScreenToolbar)
@@ -1163,7 +1170,9 @@ class PDFViewer : AppCompatActivity() {
             buttonBookmark.isGone = false
 
             currentPage.isGone = false
-            currentPage.setTextColor(ContextCompat.getColor(applicationContext, R.color.white))
+            val textColor = ContextCompat.getColor(applicationContext, R.color.white)
+            currentPage.setTextColor(textColor)
+            toolbarTitle.setTextColor(textColor)
             toolbarInvisible.isGone = true
             if (isSupportedScrollbarButton) {
                 if (horizontal) {
@@ -1260,13 +1269,14 @@ class PDFViewer : AppCompatActivity() {
         }
     }
 
-    @SuppressLint("CutPasteId")
+    @SuppressLint("CutPasteId", "ResourceType")
     private fun hideTopBar(fullHiding: Boolean = false, x: Float = 0F, y: Float = 0F) {
         if (x == y) {
             val message: ConstraintLayout = findViewById(R.id.messageGuide1)
             val messageGoTo: ConstraintLayout = findViewById(R.id.messageGoTo)
             val menuPanel: ConstraintLayout = findViewById(R.id.messageMenuPanel)
             val toolbar: View = findViewById(R.id.toolbar)
+            val toolbarTitle: TextView = findViewById(R.id.titleToolbar)
             val toolbarInvisible: View = findViewById(R.id.toolbarInvisible)
             val buttonClose: ImageView = findViewById(R.id.buttonGoBackToolbar)
             val buttonShare: ImageView = findViewById(R.id.buttonShareToolbar)
@@ -1283,12 +1293,11 @@ class PDFViewer : AppCompatActivity() {
 
             if (!showingTopBar) {
                 //hideMenuPanel()
-
-                currentPage.setTextColor(
-                    ContextCompat.getColor(
-                        applicationContext, R.color.dark_red
-                    )
+                val textColor = ContextCompat.getColor(
+                    this, R.color.dark_red
                 )
+                currentPage.setTextColor(textColor)
+                toolbarTitle.setTextColor(textColor)
 
                 hideMessageGuide1()
 
